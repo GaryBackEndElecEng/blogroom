@@ -8,7 +8,7 @@ import axios from 'axios';
 
 export function genFileUrl(user: userType, file: fileType) {
     if (user && user.name) {
-        const username = encodeURIComponent(user.name);
+        const username = user.name.replace(" ", "-");
         const url = `/blog/usershomelinks/${username}/${file.id}`
         return url
 

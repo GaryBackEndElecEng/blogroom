@@ -29,7 +29,7 @@ export default function HomeLinksHeader() {
         setShow(true) // enables group usershomelinks landing page
         const userHomePage: string | undefined = pathname.split("/")[3];
         if (!userHomePage) return setShowUserPg(false)
-        const decodeUserHomePg = decodeURIComponent(userHomePage);
+        const decodeUserHomePg = userHomePage.replace("-", " ");
         setUsername(decodeUserHomePg)
         setShowUserPg(true);
 

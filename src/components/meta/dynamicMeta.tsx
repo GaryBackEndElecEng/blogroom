@@ -15,7 +15,7 @@ export async function generateMetadata(
     const username = params.username
 
     // fetch data
-    const user_name = decodeURIComponent(username)
+    const user_name = username.replace("-", "")
     const { data } = await axios.get(`/api/getusermeta?username=${user_name}`);
     const body: userType | undefined = data;
     const image = (body && body.image) ? body.image : "/images/gb_logo.png"

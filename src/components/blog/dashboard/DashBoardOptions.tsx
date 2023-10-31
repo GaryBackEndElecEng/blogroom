@@ -28,7 +28,7 @@ export default function DashBoardOptions({ userFiles, userPosts, account, }: mai
     const { setFile, setMsg, msg, setUserFiles } = React.useContext(InputContext);
     const { setUser, user, users, setUserPosts } = React.useContext(GeneralContext);
 
-    const homePage = (user && user.name) ? `/blog/usershomelinks/${encodeURIComponent(user.name)}` : "/blog/usershomelinks/";
+    const homePage = (user && user.name) ? `/blog/usershomelinks/${user.name.replace(" ", "-")}` : "/blog/usershomelinks/";
 
     React.useEffect(() => {
         if (!user) return
