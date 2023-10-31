@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,9 +23,42 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@component/*": [
+        "./src/components/*"
+      ],
+      "@context/*": [
+        "./src/components/context/*"
+      ],
+      "@meta/*": [
+        "./src/components/meta/*"
+      ],
+      "@blogElement/*": [
+        "./src/components/blogElements/*"
+      ],
+      "@blog/*": [
+        "./src/components/blog/*"
+      ],
+      "@nav/*": [
+        "./src/components/nav/*"
+      ],
+      "@lib/*": [
+        "./src/lib/*"
+      ],
+      "@_prisma/*": [
+        "./prisma/*"
+      ],
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
