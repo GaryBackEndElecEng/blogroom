@@ -6,9 +6,9 @@ import prisma from "@_prisma/client";
 
 const s3 = new S3({
     apiVersion: "2006-03-01",
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_ACCESS_SECRET,
-    region: process.env.AWS_BUCKET_REGION,
+    accessKeyId: process.env.sdk_ACCESS_KEY,
+    secretAccessKey: process.env.sdk_ACCESS_SECRET,
+    region: process.env.BUCKET_REGION,
     signatureVersion: "v4"
 })
 // This returns all files from the DB and doesnot include inputTypes
