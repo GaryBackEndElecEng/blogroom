@@ -6,8 +6,8 @@ import S3 from "aws-sdk/clients/s3";
 
 const s3 = new S3({
     apiVersion: "2006-03-01",
-    accessKeyId: process.env.sdk_ACCESS_KEY,
-    secretAccessKey: process.env.sdk_ACCESS_SECRET,
+    accessKeyId: process.env.SDK_ACCESS_KEY,
+    secretAccessKey: process.env.SDK_ACCESS_SECRET,
     region: process.env.BUCKET_REGION,
     signatureVersion: "v4"
 })
@@ -58,7 +58,7 @@ const matchEnd = (s3Key: string) => {
 function upsertImageUrl(user: userType) {
     if (user.imgKey && matchEnd(user.imgKey)) {
         const s3Params = {
-            Bucket: process.env.AWS_BUCKET_NAME as string,
+            Bucket: process.env.BUCKET_NAME as string,
             Key: user.imgKey,
         };
 

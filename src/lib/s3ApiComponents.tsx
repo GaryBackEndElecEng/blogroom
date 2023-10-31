@@ -6,8 +6,8 @@ import S3 from "aws-sdk/clients/s3";
 
 export const s3 = new S3({
     apiVersion: "2006-03-01",
-    accessKeyId: process.env.sdk_ACCESS_KEY,
-    secretAccessKey: process.env.sdk_ACCESS_SECRET,
+    accessKeyId: process.env.SDK_ACCESS_KEY,
+    secretAccessKey: process.env.SDK_ACCESS_SECRET,
     region: process.env.BUCKET_REGION,
     signatureVersion: "v4"
 })
@@ -28,10 +28,9 @@ export async function uploadToS3(e: React.FormEvent<HTMLFormElement>, imageObj: 
     const file: File = formdata.get("file") as File
     if (!file) return null
     const ext = file.type.split("/")[1]
-    const key = `${imageObj.s3Key}.${ext}`
+    const Key = `${imageObj.s3Key}.${ext}`
     // console.log("key", key)
-    const fileType = encodeURIComponent(file.type);
-    const Key = encodeURIComponent(key);
+    const fileType = new URLSearchParams(file.type).toString();
     formdata.append("file", file);
     formdata.append("filename", file?.name);
 
@@ -55,7 +54,7 @@ export async function uploadProfileToS3(e: React.FormEvent<HTMLFormElement>, use
     e.preventDefault();
     const genUuid = uuidv4().split("-")[0]
     if (!(user.name)) return
-    const username = encodeURIComponent(user.name)
+    const username = user.name.replace(" ", "-")
     const userImage = `${genUuid}-${username}`
     const formdata = new FormData(e.currentTarget);
     const file: File = formdata.get("file") as File
@@ -63,8 +62,8 @@ export async function uploadProfileToS3(e: React.FormEvent<HTMLFormElement>, use
     if (!file) return null
     const ext = file.type.split("/")[1]
     const key = `${userImage}.${ext}`
-    const fileType = encodeURIComponent(file.type);
-    const Key = encodeURIComponent(key);
+    const Key = `${userImage}.${ext}`
+    const fileType = new URLSearchParams(file.type).toString();
     formdata.append("file", file);
     formdata.append("filename", file?.name);
     formdata.append("userImage", key);
@@ -139,9 +138,8 @@ export async function fileUploadToS3(e: React.FormEvent<HTMLFormElement>, file: 
     if (!file_) return null
     const ext = file_.type.split("/")[1];
     const genKey = `${uuidv4().split("-")[0]}-${file.name}-${uuidv4().split("-")[0]}`
-    const key = `${genKey}.${ext}`
-    const fileType = encodeURIComponent(file_.type);
-    const Key = encodeURIComponent(key);
+    const Key = `${genKey}.${ext}`
+    const fileType = new URLSearchParams(file_.type).toString();
     formdata.append("file", file_);
     formdata.append("filename", file_?.name);
 
@@ -168,11 +166,11 @@ export async function imgPostUploadToS3(e: React.FormEvent<HTMLFormElement>, use
     const file_: File = formdata.get("file") as File;
     if (!file_) return null
     const ext = file_.type.split("/")[1];
-    const encodeUsername = encodeURIComponent(user.name)
+    const encodeUsername = user.name.replace(" ", "-")
     const genKey = `${user.id}-${encodeUsername}/${uuidv4().split("-")[0]}-${file_.name}`
     const key = `${genKey}`
-    const fileType = encodeURIComponent(file_.type);
-    const Key = encodeURIComponent(key);
+    const fileType = new URLSearchParams(file_.type).toString();
+    const Key = `${genKey}`;
     formdata.append("file", file_);
     formdata.append("filename", file_?.name);
 
@@ -211,7 +209,7 @@ export function insertUrls(file: fileType) {
     let checkS3 = checkS3KeyEnd(tempFile.imageKey)
     if (!checkS3) return tempFile
     const s3Params = {
-        Bucket: process.env.AWS_BUCKET_NAME as string,
+        Bucket: process.env.BUCKET_NAME as string,
         Key: tempFile.imageKey,
     };
     const imageUrl = s3.getSignedUrl(
@@ -224,7 +222,7 @@ export function insertUrls(file: fileType) {
         let checkS3 = checkS3KeyEnd(input.s3Key)
         if (!checkS3) return input
         const s3Params = {
-            Bucket: process.env.AWS_BUCKET_NAME as string,
+            Bucket: process.env.BUCKET_NAME as string,
             Key: input.s3Key,
         };
         const imageUrl = s3.getSignedUrl(
@@ -250,7 +248,7 @@ export function retUrlInserts(files: fileType[]) {
         let check: boolean = checkS3KeyEnd(file?.imageKey);
         if (!check) return file
         const s3Params = {
-            Bucket: process.env.AWS_BUCKET_NAME as string,
+            Bucket: process.env.BUCKET_NAME as string,
             Key: file.imageKey,
         };
         const imageUrl = s3.getSignedUrl(
@@ -270,7 +268,7 @@ export function retUrlInput(input: inputType) {
     let checkS3Key = checkS3KeyEnd(input.s3Key)
     if (!checkS3Key) return input
     const s3Params = {
-        Bucket: process.env.AWS_BUCKET_NAME as string,
+        Bucket: process.env.BUCKET_NAME as string,
         Key: input.s3Key,
     };
     const imageUrl = s3.getSignedUrl(
@@ -285,7 +283,7 @@ export function getProfilePic(key: string) {
     let checkS3Key = checkS3KeyEnd(key)
     if (!checkS3Key) return null
     const s3Params = {
-        Bucket: process.env.AWS_BUCKET_NAME as string,
+        Bucket: process.env.BUCKET_NAME as string,
         Key: key,
     };
     const imageUrl = s3.getSignedUrl(
@@ -300,7 +298,7 @@ export function insertUrlPost(post: postType) {
     let checkS3Key = checkS3KeyEnd(post.s3Key)
     if (!checkS3Key) return post
     const s3Params = {
-        Bucket: process.env.AWS_BUCKET_NAME as string,
+        Bucket: process.env.BUCKET_NAME as string,
         Key: post.s3Key,
     };
     const imageUrl = s3.getSignedUrl(
@@ -308,5 +306,11 @@ export function insertUrlPost(post: postType) {
     );
     post.imageUrl = imageUrl;
     return post
+
+}
+export function insertUrlPosts(posts: postType[]) {
+    if (!posts) return
+    return posts.map(post => insertUrlPost(post))
+
 
 }

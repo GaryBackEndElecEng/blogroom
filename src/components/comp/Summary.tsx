@@ -1,18 +1,14 @@
 "use client"
 import React from 'react';
 import { InputContext } from "@context/InputTypeProvider";
-import { inputType, inputArr, fileType, propCompareType } from "@lib/Types";
+import { inputType, } from "@lib/Types";
 import { TextField } from "@mui/material";
-import { saveToStorage, getFromStorage } from "@lib/storePullLocStorage";
-import { inputComponent, insertInput, reduceModAndAddComp, removeComponent, updateFile } from "@lib/generalFunc";
+import { reduceModAndAddComp, } from "@lib/generalFunc";
 import SavedMsg from "@component/comp/SavedMsg";
-import { addInput, updateInput, updateInputOnly } from '@/lib/fetchTypes';
-import Button from './Button';
+import { updateInputOnly } from '@/lib/fetchTypes';
 import ParagraphCreator from './ParagraphCreator';
-import ButtonGroup from './ButtonGroup';
 import CloseIcon from '@mui/icons-material/Close';
 import BrowserUpdatedIcon from '@mui/icons-material/BrowserUpdated';
-import DeletePopUp from "@component/comp/DeletePopUp";
 import DeletePopUp2 from './DeletePopUp2';
 
 type mainHeader = {
@@ -24,10 +20,9 @@ export default function Summary({ input }: mainHeader) {
     const initSummary: inputType | null = input.name === subject ? input : null
     //----at Meta(top file) -id represents the BLOg ID---//
 
-    const { setFile, file, setSaved, saved, setMsg, msg, setSelect } = React.useContext(InputContext);
+    const { setFile, file, setSaved, saved, setSelect } = React.useContext(InputContext);
     const [summary, setSummary] = React.useState<inputType | null>(initSummary);
     const [popup, setPopup] = React.useState<boolean>(false);
-    const [deleteUnit, setDeleteUnit] = React.useState<inputType | undefined>()
 
     const show = (input.name === subject) ? true : false;
 

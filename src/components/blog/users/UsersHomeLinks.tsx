@@ -42,7 +42,7 @@ export default function UsersHomeLinks({ getusers }: usersTypes) {
                                 <h3 className="text-xl font-bold font-bold">{user.name}</h3>
                             </div>
                             <h3 className="text-xl font-bold my-2 px-1">Description</h3>
-                            <p className="mx-auto px-1">{user.bio}incidunt numquam dicta reiciendis facere? Ut, numquam sequi quaerat cum eius beatae ex, autem nesciunt odit, laborum earum eaque nobis saepe tenetur alias.</p>
+                            <p className="mx-auto px-1">{user.bio}</p>
                             <Link href={`/blog/usershomelinks/${user.name}`} >
                                 <Button color={"emerald"} shade={"lightgrey"} border={true}
                                 > GOTO home page</Button>

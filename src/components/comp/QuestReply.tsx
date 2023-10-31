@@ -2,8 +2,8 @@
 import React from 'react'
 import { GeneralContext } from '../context/GeneralContextProvider';
 import { Fab, TextField } from '@mui/material';
-import { dataReplyType, fileType, inputType, userAccountType } from '@lib/Types';
-import { getUserInfo, sendContact, sendEmail } from "@lib/fetchTypes";
+import { dataReplyType, inputType } from '@lib/Types';
+import { getUserInfo, sendEmail } from "@lib/fetchTypes";
 import { usePathname } from "next/navigation";
 import SendIcon from '@mui/icons-material/Send';
 
@@ -38,7 +38,7 @@ export default function QuestReply({ input, setOpenReply, openReply }: replyType
         if (!pathname) return
 
         setDataReply({ ...dataReply, userId: user.id });
-    }, [user, pathname]);
+    }, [user, pathname, setDataReply]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         if (dataReply && dataReply.content && dataReply.subject) {

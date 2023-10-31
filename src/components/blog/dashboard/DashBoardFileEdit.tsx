@@ -12,8 +12,7 @@ import DashBoardFile from "@/components/blog/dashboard/DashBoardFile";
 import SelectImage from "@component/comp/SelectImage";
 import { InputContext } from '@context/InputTypeProvider';
 import { gen_uuid } from "@lib/codeGenerator";
-import getFormattedDate from "@lib/getFormattedDate";
-import { fileType, msgType, userAccountType, userType, userTypeShort } from '@/lib/Types';
+import { fileType, } from '@/lib/Types';
 import SavedMsg from "@component/comp/SavedMsg";
 import Button from "@component/comp/Button";
 import Link from "next/link";
@@ -31,8 +30,6 @@ export default function DashBoardFileEdit({ recfile }: mainTemplateType) {
     const getCode = gen_uuid();
     const { setFile, file, saved, setSaved, select } = React.useContext(InputContext);
     const { user, account } = React.useContext(GeneralContext);
-    const [open, setOpen] = React.useState<boolean>(false);
-    const [openFile, setOpenFile] = React.useState<boolean>(true);
 
     React.useEffect(() => { setFile(recfile) }, [setFile, recfile]);
 

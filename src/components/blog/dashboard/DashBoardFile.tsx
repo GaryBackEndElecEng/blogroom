@@ -3,25 +3,17 @@ import React from 'react';
 import Title from "@/components/comp/Title";
 import Heading from "@/components/comp/Heading";
 import { InputContext } from '../../context/InputTypeProvider';
-import { gen_uuid } from "@lib/codeGenerator";
-import getFormattedDate from "@lib/getFormattedDate";
-import { inputArrType, inputType, contentType, fileType, msgType, propCompareType, userType, userAccountType, accountType } from '@lib/Types';
+import { fileType, msgType, userType } from '@lib/Types';
 import Button from "@component/comp/Button";
-import { IconButton, TextField } from "@mui/material";
+import { TextField } from "@mui/material";
 import Msg from "@/components/comp/Msg";
-import { fetchTemplateData, saveFile } from "@lib/fetchTypes";
-import { gets3Image } from "@lib/s3ApiComponents";
-import DisplayInputTypes from "@/components/blog/dashboard/template/DisplayInputTypes";
-import { saveToStorage, getFromStorage } from "@lib/storePullLocStorage";
+import { saveFile } from "@lib/fetchTypes";
+import { saveToStorage, } from "@lib/storePullLocStorage";
 import SavedMsg from "@component/comp/SavedMsg";
-import { insertType, addSelectAndSpread } from "@lib/generalFunc";
-import { GeneralContext } from '../../context/GeneralContextProvider';
 import PopUp from "@component/comp/PopUp";
-import OpenFileList from "@/components/blog/dashboard/template/OpenFileList";
-import { useRouter } from 'next/navigation';
 import FileImage from "@component/comp/FileImage";
 import ParagraphCreator from "@component/comp/ParagraphCreator"
-import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
+
 
 
 type mainFile = {
@@ -36,8 +28,7 @@ type mainFile = {
 
 
 export default function DashBoardFile({ setSaved, saved, user, file }: mainFile) {
-    const router = useRouter();
-    const { setFile, date, inputArr, setMsg, input, setInput, setGetComponents, getComponents, setSelect, select, newFileAndInputControlPoint } = React.useContext(InputContext);
+    const { setFile, date, inputArr, setMsg, newFileAndInputControlPoint } = React.useContext(InputContext);
     const [select_2, setSelect_2] = React.useState<string>("select");
     const [signup, setSignup] = React.useState<boolean>(false);
 
@@ -53,6 +44,7 @@ export default function DashBoardFile({ setSaved, saved, user, file }: mainFile)
             setMsg({ loaded: true, msg: "file saved" });
             saveToStorage(svFile);
             setFile(svFile)
+            setSaved({ loaded: true, msg: "saved" })
 
         } catch (error) {
             setMsg({ loaded: false, msg: "could not store on submit" });

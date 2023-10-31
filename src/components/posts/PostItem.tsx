@@ -2,7 +2,6 @@
 import Image from 'next/image'
 import React from 'react';
 import type { postType, userType } from "@lib/Types";
-import { GeneralContext } from '../context/GeneralContextProvider';
 import styles from "./posts.module.css";
 import Link from 'next/link';
 import { useRouter } from "next/navigation"

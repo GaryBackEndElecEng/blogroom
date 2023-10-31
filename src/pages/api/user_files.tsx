@@ -70,7 +70,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
 
 export function genFileUrl(user: userType, file: fileType) {
     if (user && user.name) {
-        const username = encodeURIComponent(user.name);
+        const username = user.name.replace(" ", "-");
         const url = `/blog/usershomelinks/${username}/${file.id}`
         return url
 

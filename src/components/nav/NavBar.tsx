@@ -1,7 +1,6 @@
 "use client";
 import Link from 'next/link'
 import React from 'react'
-import { FaYoutube, FaTwitter, FaGithub, FaLaptop } from 'react-icons/fa'
 import Login from "@component/comp/Login";
 import GBImage from "./GBImage";
 import MediaLinks from "@nav/MediaLinks";

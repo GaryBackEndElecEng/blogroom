@@ -2,12 +2,11 @@
 import React from 'react';
 import { InputContext } from "@context/InputTypeProvider";
 import { inputType, } from "@lib/Types";
-import { reduceModAndAddComp, removeComponent, } from "@lib/generalFunc";
+import { reduceModAndAddComp, } from "@lib/generalFunc";
 import SavedMsg from "@component/comp/SavedMsg";
-import { updateInput, updateInputOnly } from '@/lib/fetchTypes';
+import { updateInputOnly } from '@/lib/fetchTypes';
 import CloseIcon from '@mui/icons-material/Close';
 import BrowserUpdatedIcon from '@mui/icons-material/BrowserUpdated';
-import DeletePopUp from "@component/comp/DeletePopUp";
 import DeletePopUp2 from './DeletePopUp2';
 
 type mainHeader = {

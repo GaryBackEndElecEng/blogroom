@@ -1,5 +1,4 @@
 import type { paramsType, fetchFilesType, fileType, fetchAllType, fetchSingleFileType, inputType, userType, contactType, mainPageHit, navImageLinkType, linkType, postType, likefileType, likepostType, ratefileType, ratepostType } from "@lib/Types";
-import { saveToStorage } from "./storePullLocStorage";
 import axios from "axios";
 
 export const config = { runtime: 'experimental-edge' }
@@ -50,6 +49,7 @@ export async function addInput(input: inputType) {
 }
 
 export async function getUsers() {
+
     try {
         const { data } = await axios.get("/api/getusers");
         const body: userType[] = await data as userType[]

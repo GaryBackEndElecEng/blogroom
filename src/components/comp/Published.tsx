@@ -3,7 +3,7 @@ import React from 'react'
 import { InputContext } from '@context/InputTypeProvider'
 import { fileType } from '@/lib/Types';
 import { saveFile } from "@lib/fetchTypes"
-import { FaHtml5 } from 'react-icons/fa';
+
 
 type mainPubType = {
     setPublished: React.Dispatch<React.SetStateAction<boolean>>,

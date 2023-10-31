@@ -1,11 +1,10 @@
 "use client";
 import React from 'react'
 import { GeneralContext } from '../context/GeneralContextProvider';
-import { FaYoutube, FaTwitter, FaGithub, FaLaptop, FaFacebook, } from 'react-icons/fa';
+import { FaGithub, FaLaptop, } from 'react-icons/fa';
 import { ImFacebook2 } from "react-icons/im";
 
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import Link from 'next/link';
 import type { genInfoType } from "@lib/Types";
 import styles from "@nav/nav.module.css";
 

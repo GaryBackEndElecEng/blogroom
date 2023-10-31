@@ -11,14 +11,7 @@ const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site
 type params = {
     postId: string
 }
-// export async function generateStaticParams(): Promise<params[]> {
 
-//     const data = await fetch(`${url}/api/getposts`);
-//     const posts: postType[] = await data.json()
-//     const getParams = posts.map((post, index) => ({ postId: String(post.id) }));
-//     return getParams
-
-// }
 
 export default async function postdetail({ params }: { params: { postId: string } }) {
     const postId: number = parseInt(params.postId)

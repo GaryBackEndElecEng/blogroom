@@ -1,14 +1,11 @@
 "use client";
 import { postType, arrLikeType } from '@/lib/Types';
-import axios from 'axios'
 import React from 'react';
-import { getPosts } from "@lib/fetchTypes";
 import Image from 'next/image';
 import getFormattedDate from "@lib/getFormattedDate"
 import { GeneralContext } from '../context/GeneralContextProvider';
 import { getUser } from "@lib/fetchTypes";
 import DetailPostUser from "@component/posts/DetailPostUser";
-import Link from 'next/link';
 import DetailPostPopup from "@component/posts/DetailPostPopup";
 
 type likeType = {
@@ -20,7 +17,7 @@ type mainDetailType = {
 }
 
 export default function DetailPost({ post }: mainDetailType) {
-    const { setUser, user, postRates, setPostRates, setPostLikes, postLikes } = React.useContext(GeneralContext);
+    const { setUser, user, } = React.useContext(GeneralContext);
     const [rateAvg, setRateAvg] = React.useState<number>(0);
     const [likeCntArr, setLikeCntArr] = React.useState<likeType[]>([]);
     const [popup, setPopup] = React.useState<boolean>(false);

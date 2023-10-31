@@ -3,10 +3,8 @@ import React from 'react';
 import styles from "./client.module.css"
 import { GeneralContext } from '@context/GeneralContextProvider';
 import { usePathname } from "next/navigation";
-import UsersImage from '@component/header/UsersImage';
-import { userType } from '@/lib/Types';
 import Image from 'next/image';
-import { getUser, getUserMeta } from '@/lib/fetchTypes';
+import { getUserMeta } from '@/lib/fetchTypes';
 
 export default function HomeLinksHeader() {
     const url = "/images/gb_logo.png";

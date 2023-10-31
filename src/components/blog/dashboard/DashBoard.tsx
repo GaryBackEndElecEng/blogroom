@@ -2,12 +2,10 @@
 import { fileType, postType, userAccountType, userType } from '@/lib/Types';
 import React from 'react'
 import Login from "@component/comp/Login";
-import Contact from "@component/comp/Contact";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { GeneralContext } from '@/components/context/GeneralContextProvider';
-import UserPageHit from "@/components/blog/dashboard/UserPageHit"
-import { getUserPosts, getuserFiles, user_files } from "@lib/fetchTypes";
+import { getUserPosts, user_files } from "@lib/fetchTypes";
 import DashBoardOptions from "@/components/blog/dashboard/DashBoardOptions";
 import GenFileItem from "@/components/blog/dashboard/template/GenFileItem";
 import Link from 'next/link';
@@ -23,9 +21,6 @@ export default function DashBoard({ account, getuser }: mainContextType) {
     const pathname = usePathname();
     const { setPageHit, setUser, user, setUserPosts, userPosts } = React.useContext(GeneralContext);
     const { setUserFiles, userFiles } = React.useContext(InputContext);
-    const [contact, setContact] = React.useState<boolean>(false);
-    const [getUserFiles, setGetUserFiles] = React.useState<fileType[]>([]);
-    const [getuserPosts, setGetuserPosts] = React.useState<postType[]>([]);
     const [cols, setCols] = React.useState<number>(0);
 
     React.useEffect(() => {

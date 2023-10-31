@@ -7,14 +7,14 @@ import { insertUrls } from "@lib/s3ApiComponents";
 // import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const bucketName = "masterultils-postimages"
-const region = process.env._AWS_BUCKET_REGION as string
-const accessKeyId = process.env._AWS_ACCESS_KEY as string
-const secretAccessKey = process.env._AWS_ACCESS_SECRET as string
+const region = process.env.BUCKET_REGION as string
+const accessKeyId = process.env.SDK_ACCESS_KEY as string
+const secretAccessKey = process.env.SDK_ACCESS_SECRET as string
 
 const s3 = new S3({
     apiVersion: "2006-03-01",
-    accessKeyId: process.env.sdk_ACCESS_KEY,
-    secretAccessKey: process.env.sdk_ACCESS_SECRET,
+    accessKeyId: process.env.SDK_ACCESS_KEY,
+    secretAccessKey: process.env.SDK_ACCESS_SECRET,
     region: process.env.BUCKET_REGION,
     signatureVersion: "v4"
 })

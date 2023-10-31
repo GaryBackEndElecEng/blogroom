@@ -1,5 +1,5 @@
 import React from 'react';
-import { likefileType, ratepostType, ratefileType, likepostType, postType, fileType, userType, arrLikeType } from "@lib/Types";
+import { likefileType, likepostType, arrLikeType } from "@lib/Types";
 
 type countArrType = {
     name: string,

@@ -9,30 +9,19 @@ import { userType } from '@/lib/Types';
 
 const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site : process.env.NEXT_PUBLIC_local
 
-type params = {
-    username: string
-}
-
-// export async function generateStaticParams(): Promise<params[]> {
-//     const res = await fetch(`${url}/api/getusers`);
-//     const users: userType[] = await res.json();
-//     const genparams = users.map((user, index) => {
-//         return { username: user.name }
-//     });
-//     return genparams as params[]
-// }
-
 export default async function userNames({ params }: { params: { username: string } }) {
-    const get_users = await getUsers();
-
     const { username } = params;
-    const decodeUsername = decodeURIComponent(username)
-    if (!get_users) return
-    const get_user = get_users.find(user => (user.name === decodeUsername))
+    const get_users = await getUsers();
+    let get_user: userType | undefined;
+    if (get_users) {
+        const decodename = username.replace("-", " ");
+        get_user = get_users.find(user => (user.name === decodename))
+    }
+
 
     if (get_user) {
         return (
-            <UserNameBlogs username={decodeUsername} getuser={get_user && get_user} />
+            <UserNameBlogs getuser={get_user && get_user} />
         )
     } else {
         return (
@@ -58,8 +47,8 @@ export async function generateMetadata(
     const username = params.username
 
     // fetch data
-    const user_name = decodeURIComponent(username)
-    const res = await fetch(`${url}/api/getusermeta?username=${user_name}`);
+    const user_name = username.replace("-", " ")
+    const res = await fetch(`${url}/api/getusermeta?username=${username}`);
     const body: userType = await res.json();
     const image = (body && body.image) ? body.image : "/images/gb_logo.png"
 

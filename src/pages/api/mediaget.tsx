@@ -8,8 +8,8 @@ type dataType = {
 }
 const s3 = new S3({
     apiVersion: "2006-03-01",
-    accessKeyId: process.env.sdk_ACCESS_KEY,
-    secretAccessKey: process.env.sdk_ACCESS_SECRET,
+    accessKeyId: process.env.SDK_ACCESS_KEY,
+    secretAccessKey: process.env.SDK_ACCESS_SECRET,
     region: process.env.BUCKET_REGION,
     signatureVersion: "v4"
 })
@@ -23,7 +23,7 @@ export default async function handler(
     const Key: string = (req.query.Key as string)
     // console.log("Key", Key)
     const s3Params = {
-        Bucket: process.env.AWS_BUCKET_NAME as string,
+        Bucket: process.env.BUCKET_NAME as string,
         Key,
         Expires: 90,
         ContentType: `image/${ext}`,

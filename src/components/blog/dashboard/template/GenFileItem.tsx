@@ -20,8 +20,7 @@ type mainBlogItemType = {
 
 export default function GenFileItem({ get_file }: mainBlogItemType) {
     const [getData, setGetData] = React.useState<fetchSingleFileType>({} as fetchSingleFileType);
-    const [msg, setMsg] = React.useState<msgType>({} as msgType);
-    const { file, setFile } = React.useContext(InputContext);
+    const { msg } = React.useContext(InputContext);
     const [published, setPublished] = React.useState<boolean>(false);
     const [staticFile, setStaticFile] = React.useState<fileType>({} as fileType)
 

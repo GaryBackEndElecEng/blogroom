@@ -11,7 +11,7 @@ export default function Contact({ account }: { account: userAccountType }) {
         if (!contact || !account?.data) return
         const userId: string = account && account.data.id
         setContact({ ...contact, userId: userId })
-    }, [account]);
+    }, [account,]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         if (contact && contact.content && contact.subject) {

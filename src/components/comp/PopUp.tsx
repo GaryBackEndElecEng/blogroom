@@ -1,8 +1,7 @@
 import { useRouter } from 'next/navigation';
 import React from 'react'
-import Button from "@component/comp/Button";
 import { GeneralContext } from "@context/GeneralContextProvider";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { signIn, } from "next-auth/react";
 
 type mainPopType = {
     setSignup: React.Dispatch<React.SetStateAction<boolean>>,

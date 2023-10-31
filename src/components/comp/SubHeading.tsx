@@ -1,16 +1,12 @@
 "use client"
 import React from 'react';
 import { InputContext } from "@context/InputTypeProvider";
-import { inputType, inputArr, fileType, propCompareType } from "@lib/Types";
-import { saveToStorage, getFromStorage } from "@lib/storePullLocStorage";
-import { inputComponent, insertInput, reduceModAndAddComp, removeComponent, updateFile } from "@lib/generalFunc";
+import { inputType, } from "@lib/Types";
+import { reduceModAndAddComp, } from "@lib/generalFunc";
 import SavedMsg from "@component/comp/SavedMsg";
-import { addInput, updateInput, updateInputOnly } from '@/lib/fetchTypes';
-import Button from './Button';
-import ButtonGroup from './ButtonGroup';
+import { updateInputOnly } from '@/lib/fetchTypes';
 import CloseIcon from '@mui/icons-material/Close';
 import BrowserUpdatedIcon from '@mui/icons-material/BrowserUpdated';
-import DeletePopUp from "@component/comp/DeletePopUp";
 import DeletePopUp2 from './DeletePopUp2';
 
 
@@ -23,10 +19,10 @@ export default function SubHeading({ input }: mainHeader) {
     const initHeading: inputType | null = input.name === subject ? input : null
     //----at Meta(top file) -id represents the BLOg ID---//
 
-    const { setFile, file, setSaved, saved, setMsg, msg, setSelect } = React.useContext(InputContext);
+    const { setFile, file, setSaved, saved, setSelect } = React.useContext(InputContext);
     const [subHeading, setSubHeading] = React.useState<inputType | null>(initHeading);
     const [popup, setPopup] = React.useState<boolean>(false);
-    const [deleteUnit, setDeleteUnit] = React.useState<inputType | undefined>()
+
     const show = (input.name === subject) ? true : false;
 
     const handleSend = async (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {

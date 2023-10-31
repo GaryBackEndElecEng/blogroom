@@ -1,9 +1,7 @@
 import { type NextAuthOptions } from "next-auth"
 import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
-import Providers from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import { URLSearchParams } from "url";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { hashKey, hashComp } from "@lib/ultils";
 import { PrismaAdapter } from "@auth/prisma-adapter";

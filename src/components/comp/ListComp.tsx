@@ -1,15 +1,13 @@
 "use client"
-import React, { HTMLAttributes } from 'react';
+import React from 'react';
 import { TextField } from "@mui/material";
 import { InputContext } from "@context/InputTypeProvider";
 import { inputType, } from "@lib/Types";
-import { reduceModAndAddComp, removeComponent, } from "@lib/generalFunc";
+import { reduceModAndAddComp, } from "@lib/generalFunc";
 import SavedMsg from "@component/comp/SavedMsg";
-import { updateInput, updateInputOnly } from '@/lib/fetchTypes';
+import { updateInputOnly } from '@/lib/fetchTypes';
 import CloseIcon from '@mui/icons-material/Close';
 import BrowserUpdatedIcon from '@mui/icons-material/BrowserUpdated';
-import DeletePopUp from "@component/comp/DeletePopUp";
-import ArrowRightOutlinedIcon from '@mui/icons-material/ArrowRightOutlined';
 import DeletePopUp2 from './DeletePopUp2';
 
 type mainType = {
@@ -19,7 +17,7 @@ export default function ListComp({ input }: mainType) {
     const subject = "list";
     const show = input.name === subject ? true : false;
     const initList = show ? input : null;
-    const { file, setFile, setMsg, msg, saved, setSaved, } = React.useContext(InputContext);
+    const { file, setFile, saved, setSaved, } = React.useContext(InputContext);
     const [listitem, setListitem] = React.useState<inputType | null>(initList);
     const [popup, setPopup] = React.useState<boolean>(false);
 

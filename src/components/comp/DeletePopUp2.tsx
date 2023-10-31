@@ -1,4 +1,4 @@
-import { fileType, inputType, msgType } from '@/lib/Types'
+import { inputType, } from '@/lib/Types'
 import { removeComponent } from '@/lib/generalFunc'
 import React from 'react'
 import { InputContext } from '../context/InputTypeProvider'

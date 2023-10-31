@@ -6,7 +6,6 @@ import Features from "./Features";
 import { GeneralContext } from '../context/GeneralContextProvider';
 import { usePathname } from "next/navigation";
 import NeedRegister from "./NeedRegister";
-import useAccount from "next-auth"
 import { userAccountType } from '@/lib/Types';
 
 export const introArr = [

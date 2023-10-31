@@ -1,12 +1,12 @@
 "use client";
 import React from 'react'
-import { getAccount } from '@lib/nextAuth';
 import { fileType, postType, userAccountType, userType } from '@/lib/Types';
 import { GeneralContext } from '../context/GeneralContextProvider';
 import { usePathname } from "next/navigation";
 import { imgPostUploadToS3 } from '@/lib/s3ApiComponents';
 import { sendPost } from '@/lib/fetchTypes';
 import { FormControl, FormLabel, TextField } from '@mui/material';
+import { InputContext } from '../context/InputTypeProvider';
 
 type fileUrlType = {
     name: string,
@@ -20,27 +20,29 @@ type mainAccType = {
 export default function PostForm({ getAccount, getuser, userFiles }: mainAccType) {
     const pathname = usePathname();
     const { setPageHit, setAccount, account, setPosts, posts, setUser, user, setPost, post, setMsg, msg, setUserPosts, userPosts } = React.useContext(GeneralContext);
+    const { setUserFiles } = React.useContext(InputContext);
     const [imgFile, setImgFile] = React.useState<File>({} as File);
     const [imgTemp, setImgTemp] = React.useState<File>({} as File);
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [fileUrls, setFileUrls] = React.useState<fileUrlType[] | null>(null);
 
     React.useEffect(() => {
-        if (userFiles) {
+        if (getuser) {
             let arr: fileUrlType[] = [{ name: "select a file", url: "none" }]
-            userFiles.forEach((file, index) => {
+            getuser.files.forEach((file, index) => {
                 arr.push({ name: file.name, url: file.fileUrl })
             });
             setFileUrls(arr)
-
         }
-    }, [setFileUrls, userFiles]);
+    }, [setFileUrls, getuser]);
 
     React.useEffect(() => {
         if (!getAccount || !getuser) return
         setAccount(getAccount);
-        setUser(getuser)
-    }, [getAccount, setAccount, setUser, getuser]);
+        setUser(getuser);
+        setUserPosts(getuser.posts)
+        setUserFiles(getuser.files)
+    }, [getAccount, setAccount, setUser, getuser, setUserPosts, setUserFiles]);
 
     React.useEffect(() => {
         if (!pathname || !getAccount || !getAccount.data) return
@@ -59,7 +61,7 @@ export default function PostForm({ getAccount, getuser, userFiles }: mainAccType
         const temp: postType = { ...post, s3Key: key, userId: user.id };
         setPost(temp);
         const recPost = await sendPost(temp);
-        if (recPost) { setPosts([...posts, recPost]); setMsg({ loaded: true, msg: "saved" }) }
+        if (recPost) { setPosts([...posts, recPost]); setMsg({ loaded: true, msg: "saved" }); setUserPosts([...userPosts, recPost]) }
         else { setPosts([...posts, temp]); setMsg({ loaded: false, msg: "post was not saved" }) };
 
         setImgFile({} as File)

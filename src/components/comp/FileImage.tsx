@@ -1,16 +1,15 @@
 "use client"
 import React from 'react';
-import { inputType, propCompareType, fileType, mediaType } from '@/lib/Types';
+import { inputType, fileType, mediaType } from '@/lib/Types';
 import { v4 as uuidv4 } from "uuid";
 import { InputContext } from "@context/InputTypeProvider";
 import axios from "axios";
 import { Button } from "@chakra-ui/react"
-import { inputComponent, insertInput } from '@/lib/generalFunc';
-import { saveToStorage, getFromStorage } from "@lib/storePullLocStorage";
-import { uploadToS3, gets3Image, fileUploadToS3 } from "@lib/s3ApiComponents";
+import { saveToStorage, } from "@lib/storePullLocStorage";
+import { fileUploadToS3 } from "@lib/s3ApiComponents";
 import Image from 'next/image';
-import { addInput, saveFile } from '@/lib/fetchTypes';
-import { updateFile } from "@lib/generalFunc";
+import { saveFile } from '@/lib/fetchTypes';
+
 
 type mediaInputType = {
     imageObj: inputType,

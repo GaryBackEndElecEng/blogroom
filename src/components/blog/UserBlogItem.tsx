@@ -38,7 +38,7 @@ export default function UserBlogItem({ file }: mainBlogItemType) {
     React.useEffect(() => {
         if (!(user && user.name)) return
         if (!pathname) return
-        let username = encodeURIComponent(user.name);
+        let username = user.name.replace(" ", "-");
         let url = `/blog/usershomelinks/${username}`
         setRetUrl(url);
         setPageHit({ name: username, page: pathname })

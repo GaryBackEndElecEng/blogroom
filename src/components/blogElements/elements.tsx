@@ -1,8 +1,7 @@
 "use client"
 import React from 'react';
 import Image from "next/image";
-import { inputType, inputArr, fileType, linkType } from "@lib/Types";
-import Link from 'next/link';
+import { inputType, fileType, linkType } from "@lib/Types";
 import { InputContext } from "@context/InputTypeProvider";
 import QuestReply from "@component/comp/QuestReply";
 import SendIcon from '@mui/icons-material/Send';
@@ -124,7 +123,7 @@ export function ParagraphCreator({ content, name }: { content: string, name: str
     )
 }
 
-export const list: { nameType: string, item1: string, item2: string, item3: string }[] = [
+export const list_: { nameType: string, item1: string, item2: string, item3: string }[] = [
     { nameType: "container", item1: "lg:container mx-auto my-3 relative flex flex-col items-center gap-3", item2: "", item3: "" },
     { nameType: "h3", item1: "mx-auto text-center text-xl", item2: "", item3: "" },
     { nameType: "h2", item1: "mx-auto text-center text-2xl underline underline-offset-8", item2: "", item3: "" },
@@ -144,11 +143,11 @@ export const list: { nameType: string, item1: string, item2: string, item3: stri
 ];
 
 export const type_ = (name: string) => {
-    const result = list.filter(item => {
+    const result = list_.filter(item => {
         if (name === item.nameType) {
             return item
         }
-        return list.find(item => (item.nameType === "default"))
+        return list_.find(item => (item.nameType === "default"))
     })[0];
     if (result) return result
     return

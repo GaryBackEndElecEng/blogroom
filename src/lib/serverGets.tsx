@@ -1,31 +1,41 @@
 import prisma from "@_prisma/client";
 import { fileType, postType, userAccountType, userType } from "@lib/Types";
 import S3 from "aws-sdk/clients/s3";
-import { insertUrls, retUrlInserts, getProfilePic } from "@lib/s3ApiComponents";
+import { insertUrls, retUrlInserts, getProfilePic, insertUrlPosts, insertUrlPost } from "@lib/s3ApiComponents";
 import { getServerSession } from "next-auth";
 import authOptions from "./authOptions";
 
 const s3 = new S3({
     apiVersion: "2006-03-01",
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_ACCESS_SECRET,
-    region: process.env.AWS_BUCKET_REGION,
+    accessKeyId: process.env.SDK_ACCESS_NAME,
+    secretAccessKey: process.env.SDK_ACCESS_SECRET,
+    region: process.env.BUCKET_NAME,
     signatureVersion: "v4"
 });
 
 
 export async function getUsers() {
     try {
-        const users = await prisma.user.findMany({
-            include: { files: true }
-        });
+        const users = await prisma.user.findMany();
         const body: userType[] | [] = users as userType[]
         const insertS3Img: userType[] = body.map((user, index) => {
-            if (!user.imgKey) return user;
-            let imageURL = getProfilePic(user.imgKey);
-            if (!imageURL) return user
-            return { ...user, image: imageURL }
-        })
+            let tempUser = user;
+            if (user.imgKey) {
+                let imageURL = getProfilePic(user.imgKey);
+                if (imageURL) {
+                    tempUser = { ...user, image: imageURL as string };
+                    return tempUser
+                } else {
+                    return tempUser
+                }
+
+            } else {
+
+                return tempUser
+            }
+
+        });
+        await prisma.$disconnect()
         return insertS3Img
     } catch (error) {
         throw new Error("issues getting users")
@@ -85,7 +95,7 @@ export async function getFile(fileID: string) {
                 inputTypes: true
             }
         });
-        const body: fileType | undefined = await insertUrls(file as fileType)
+        const body: fileType | undefined = insertUrls(file as fileType)
         return body
     } catch (error) {
         throw new Error("issues getting file")
@@ -188,6 +198,8 @@ export async function getUserFiles() {
 
     } catch (error) {
         console.error(new Error("could not get userfiles@serverGets"))
+    } finally {
+        await prisma.$disconnect()
     }
 }
 
@@ -195,7 +207,7 @@ export async function getPosts() {
     try {
         const posts = await prisma.post.findMany();
         const insertUrlPosts = posts.map((post, index) => {
-            if (post.s3Key && post.imageUrl) {
+            if (post.s3Key) {
                 return insertUrlPost(post as postType)
             } else {
                 return post
@@ -204,6 +216,8 @@ export async function getPosts() {
         return insertUrlPosts;
     } catch (error) {
         console.error(new Error(" server issue- no posts"))
+    } finally {
+        await prisma.$disconnect()
     }
 }
 export function checkS3KeyEnd(s3Key: string | undefined) {
@@ -213,21 +227,7 @@ export function checkS3KeyEnd(s3Key: string | undefined) {
     return check
 }
 
-export function insertUrlPost(post: postType) {
-    if (!post.s3Key) return post
-    let checkS3Key = checkS3KeyEnd(post.s3Key)
-    if (!checkS3Key) return post
-    const s3Params = {
-        Bucket: process.env.AWS_BUCKET_NAME as string,
-        Key: post.s3Key,
-    };
-    const imageUrl = s3.getSignedUrl(
-        "getObject", s3Params
-    );
-    post.imageUrl = imageUrl;
-    return post
 
-}
 
 export async function getDetailPost(postId: number) {
     try {
@@ -243,5 +243,7 @@ export async function getDetailPost(postId: number) {
         return insertUrlPost(post as postType)
     } catch (error) {
 
+    } finally {
+        await prisma.$disconnect()
     }
 }

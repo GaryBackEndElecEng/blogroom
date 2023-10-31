@@ -6,8 +6,8 @@ import { insertUrls } from "@lib/s3ApiComponents";
 
 const s3 = new S3({
     apiVersion: "2006-03-01",
-    accessKeyId: process.env.sdk_ACCESS_KEY,
-    secretAccessKey: process.env.sdk_ACCESS_SECRET,
+    accessKeyId: process.env.SDK_ACCESS_KEY,
+    secretAccessKey: process.env.SDK_ACCESS_SECRET,
     region: process.env.BUCKET_REGION,
     signatureVersion: "v4"
 })
@@ -83,7 +83,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
 
 export function genFileUrl(user: userType, file: fileType) {
     if (user && user.name) {
-        const username = encodeURIComponent(user.name);
+        const username = user.name.replace(" ", "-");
         const url = `/blog/usershomelinks/${username}/${file.id}`
         return url
 

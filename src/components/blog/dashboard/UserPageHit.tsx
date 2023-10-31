@@ -1,8 +1,8 @@
 "use client";
 import React from 'react'
 import { GeneralContext } from '../../context/GeneralContextProvider'
-import { userType, mainPageHit, fileType, userTypeShort } from '@/lib/Types';
-import { getPageHits, } from "@lib/fetchTypes";
+import { userType, mainPageHit, fileType, } from '@/lib/Types';
+
 
 type mainPageHitType = {
     files: fileType[] | []

@@ -9,8 +9,8 @@ import { insertUrls } from "@lib/s3ApiComponents"
 
 const s3 = new S3({
     apiVersion: "2006-03-01",
-    accessKeyId: process.env.sdk_ACCESS_KEY,
-    secretAccessKey: process.env.sdk_ACCESS_SECRET,
+    accessKeyId: process.env.SDK_ACCESS_KEY,
+    secretAccessKey: process.env.SDK_ACCESS_SECRET,
     region: process.env.BUCKET_REGION,
     signatureVersion: "v4"
 })
@@ -87,7 +87,7 @@ const matchEnd = (input: inputType) => {
 function upsertImageUrl(input: inputType) {
     if (input.name === "image" && input.s3Key && matchEnd(input)) {
         const s3Params = {
-            Bucket: process.env.AWS_BUCKET_NAME as string,
+            Bucket: process.env.BUCKET_NAME as string,
             Key: input.s3Key,
         };
 
@@ -105,7 +105,7 @@ function fileInsertImages(file: fileType) {
     let tempFile: fileType = file;
     if (tempFile.imageUrl) {
         const s3Params = {
-            Bucket: process.env.AWS_BUCKET_NAME as string,
+            Bucket: process.env.BUCKET_NAME as string,
             Key: tempFile.imageKey,
         };
         tempFile.imageUrl = s3.getSignedUrl(

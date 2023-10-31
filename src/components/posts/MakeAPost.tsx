@@ -3,7 +3,6 @@ import React from 'react'
 import { fileType, postType, userAccountType, userType } from '@/lib/Types';
 import { GeneralContext } from '../context/GeneralContextProvider';
 import { usePathname } from "next/navigation";
-import { getUserPosts } from '@/lib/fetchTypes';
 import styles from './posts.module.css'
 import PostForm from "./PostForm";
 import MakeAPostItem from "./MakeAPostItem";
@@ -21,13 +20,7 @@ export default function MakeAPost({ getAccount, getuser, getuserfiles }: mainAcc
     const { setPageHit, setAccount, account, setPosts, posts, setUser, user, setPost, post, setMsg, msg } = React.useContext(GeneralContext);
     const { setUserFiles, userFiles } = React.useContext(InputContext);
     const [userPosts, setUserPosts] = React.useState<postType[]>([])
-    const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
-    // React.useEffect(() => {
-    //     if (getuserfiles) {
-    //         setUserFiles(getuserfiles);
-    //     }
-    // }, [getuserfiles, setUserFiles,])
 
     React.useEffect(() => {
         if (!getAccount || !getuser) return

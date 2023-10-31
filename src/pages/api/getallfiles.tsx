@@ -6,20 +6,26 @@ import prisma from "@_prisma/client";
 
 const s3 = new S3({
     apiVersion: "2006-03-01",
-    accessKeyId: process.env.sdk_ACCESS_KEY,
-    secretAccessKey: process.env.sdk_ACCESS_SECRET,
+    accessKeyId: process.env.SDK_ACCESS_KEY,
+    secretAccessKey: process.env.SDK_ACCESS_SECRET,
     region: process.env.BUCKET_REGION,
     signatureVersion: "v4"
 })
 // This returns all files from the DB and doesnot include inputTypes
 
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
-    try {
-        const allFiles = await prisma.file.findMany();
-        if (allFiles) {
-            const files: fileType[] = allFiles as fileType[];
-            const getFiles = retUrlInserts(files)
 
+    try {
+        const allFiles = await prisma.file.findMany({
+            include: {
+                inputTypes: true,
+                likes: true,
+                rates: true
+            }
+        });
+        if (allFiles) {
+            const files: fileType[] = allFiles;
+            const getFiles = retUrlInserts(files)
             res.status(200).json(getFiles)
         } else {
             res.status(404).json({ message: "no files found from getallfiles" })
@@ -28,6 +34,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
         throw new Error("server error from api/getallFiles()")
     }
 }
+
 export function checkS3KeyEnd(s3Key: string | undefined) {
     if (!s3Key) return false
     const arrEnds = [".png", ".jpeg", ".web"];
@@ -38,11 +45,13 @@ export function checkS3KeyEnd(s3Key: string | undefined) {
 export function retUrlInserts(files: fileType[]) {
 
     const getFiles = files.map(file => {
-        if (!(file && file?.imageKey && file?.imageUrl)) return file
+
+        if (!(file && file?.imageKey)) return file
+
         let check: boolean = checkS3KeyEnd(file?.imageKey);
         if (!check) return file
         const s3Params = {
-            Bucket: process.env.AWS_BUCKET_NAME as string,
+            Bucket: process.env.BUCKET_NAME as string,
             Key: file.imageKey,
         };
         const imageUrl = s3.getSignedUrl(

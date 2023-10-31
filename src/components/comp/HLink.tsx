@@ -1,31 +1,18 @@
 "use client"
-import Link from 'next/link'
 import React from 'react';
-import { inputType, inputArr, msgType, linkType } from "@lib/Types";
+import { inputType, } from "@lib/Types";
 import { GeneralContext } from '@context/GeneralContextProvider';
 import CloseIcon from '@mui/icons-material/Close';
 import BrowserUpdatedIcon from '@mui/icons-material/BrowserUpdated';
 import DeletePopUp2 from "@component/comp/DeletePopUp2";
 import { InputContext } from '../context/InputTypeProvider';
-import { createLink, updateInput, storeLinks } from '@/lib/fetchTypes';
-import { removeComponent, removeDuplicates } from '@lib/generalFunc';
-import { useRouter } from "next/navigation";
+import { updateInput, storeLinks } from '@/lib/fetchTypes';
 import SavedMsg from './SavedMsg';
 
 type hlinkType = {
     input: inputType
 }
-const initInput: inputType = {
-    id: 0,
-    name: "link",
-    content: "",
-    url: null,
-    type: "text",
-    s3Key: null,
-    fileId: "",
-    date: undefined
 
-};
 
 export default function HLink({ input }: hlinkType) {
 
@@ -34,7 +21,6 @@ export default function HLink({ input }: hlinkType) {
     const { setMsg, msg } = React.useContext(GeneralContext);
     const { file, setFile, saved, setSaved, setGetlinks, getlinks } = React.useContext(InputContext);
     const [popup, setPopup] = React.useState<boolean>(false);
-    const [deleteUnit, setDeleteUnit] = React.useState<inputType | undefined>();
     const [pass, setPass] = React.useState<boolean>(false);
     const [hlink, setHlink] = React.useState<inputType | null>(init);
     const [isSaved, setIsSaved] = React.useState<boolean>(false);

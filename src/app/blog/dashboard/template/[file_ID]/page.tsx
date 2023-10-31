@@ -7,15 +7,7 @@ import InsertInputContext from "@component/blog/dashboard/InsertInputContext";
 
 const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site : process.env.NEXT_PUBLIC_local
 
-type params = {
-    file_ID: string
-}
-// export async function generateStaticParams(): Promise<params[]> {
-//     const res = await fetch(`${url}/api/getallfiles`);
-//     const allFiles: fileType[] = await res.json()
-//     const retParams: params[] = allFiles.map((file) => ({ file_ID: file.id }));
-//     return retParams
-// }
+
 export default async function FileHandle({ params }: { params: { file_ID: string } }) {
     const { file_ID } = params;
     const file = await getFile(file_ID);

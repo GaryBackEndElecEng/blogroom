@@ -6,19 +6,19 @@ import S3 from "aws-sdk/clients/s3";
 
 const s3 = new S3({
     apiVersion: "2006-03-01",
-    accessKeyId: process.env.sdk_ACCESS_KEY,
-    secretAccessKey: process.env.sdk_ACCESS_SECRET,
+    accessKeyId: process.env.SDK_ACCESS_KEY,
+    secretAccessKey: process.env.SDK_ACCESS_SECRET,
     region: process.env.BUCKET_REGION,
     signatureVersion: "v4"
 })
 
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
     const username: string = req.query.username as string;
-
+    const user_name = username.replace("-", " ")
     try {
         const user = await prisma.user.findMany({
             where: {
-                name: username
+                name: user_name
             },
 
             skip: 0,

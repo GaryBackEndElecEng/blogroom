@@ -7,22 +7,6 @@ import { Metadata, ResolvingMetadata } from 'next';
 
 const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site : process.env.NEXT_PUBLIC_local
 
-// export async function generateStaticParams() {
-//     const res = await fetch(`${url}/api/getusers`);
-//     const users: userType[] | [] = await res.json();
-//     const retArr = users.map((user, index) => {
-//         const file: fileType | undefined = user.files.find(file => user.id === file.userId)
-//         if (file) {
-//             return (
-//                 {
-//                     fileID: file.id
-//                 }
-//             )
-//         }
-//     });
-//     return retArr
-// }
-
 export default async function filenamePage({ params }: { params: { fileID: string } }) {
 
     const file = await getFile(params.fileID as string)
@@ -49,7 +33,7 @@ export async function generateMetadata(
     parent: ResolvingMetadata
 ): Promise<Metadata> {
     // read route params
-    const username = decodeURIComponent(params.username);
+    const username = params.username.replace("-", " ");
     const fileID = params.fileID
 
     // fetch data

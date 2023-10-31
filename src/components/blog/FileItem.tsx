@@ -1,13 +1,10 @@
 "use client";
 import React from 'react'
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { fileType, inputType, userType } from '@/lib/Types';
 import Image from 'next/image';
-import { inputInsertUrl } from "@lib/generalFunc";
 import getFormattedDate from "@lib/getFormattedDate";
 
 
@@ -35,9 +32,7 @@ export default function FileItem({ file, index, users }: mainFileType) {
 
     const handleRoute = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, file: fileType, user: userType) => {
         e.preventDefault();
-        if (!(user && user.name && file && file.name)) return
-        const username = encodeURIComponent(user.name);
-        const filename = encodeURIComponent(file.name)
+        if (!(file && file.id)) return
         router.push(`/blog/${file.id}`)
 
     }

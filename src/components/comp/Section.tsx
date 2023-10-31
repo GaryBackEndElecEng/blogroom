@@ -1,18 +1,14 @@
 "use client"
 import React from 'react';
 import { InputContext } from "@context/InputTypeProvider";
-import { inputType, inputArr, fileType, propCompareType } from "@lib/Types";
+import { inputType, } from "@lib/Types";
 import { TextField } from "@mui/material";
-import { saveToStorage, getFromStorage } from "@lib/storePullLocStorage";
 import SavedMsg from "@component/comp/SavedMsg";
-import { inputComponent, insertInput, quickFileRemove, quickFileUpdate, reduceModAndAddComp, removeComponent, updateFile } from '@/lib/generalFunc';
-import { addInput, updateInput, updateInputOnly } from '@/lib/fetchTypes';
-import Button from './Button';
+import { reduceModAndAddComp, } from '@/lib/generalFunc';
+import { updateInputOnly } from '@/lib/fetchTypes';
 import ParagraphCreator from './ParagraphCreator';
-import ButtonGroup from './ButtonGroup';
 import CloseIcon from '@mui/icons-material/Close';
 import BrowserUpdatedIcon from '@mui/icons-material/BrowserUpdated';
-import DeletePopUp from "@component/comp/DeletePopUp";
 import DeletePopUp2 from './DeletePopUp2';
 
 type mainHeader = {

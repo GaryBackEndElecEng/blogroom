@@ -1,14 +1,11 @@
 "use client"
 import React from 'react';
 import { InputContext } from "@context/InputTypeProvider";
-import { inputType, inputArr, fileType, propCompareType } from "@lib/Types";
-import { saveToStorage, getFromStorage } from "@lib/storePullLocStorage";
+import { inputType, } from "@lib/Types";
 import { TextField } from "@mui/material";
-import { inputComponent, insertInput, reduceModAndAddComp, removeComponent, updateFile } from "@lib/generalFunc";
+import { reduceModAndAddComp, } from "@lib/generalFunc";
 import SavedMsg from "@component/comp/SavedMsg";
-import { addInput, deleteInput, getUserInfo, updateInput, updateInputOnly } from '@/lib/fetchTypes';
-import Button from './Button';
-import ButtonGroup from "@component/comp/ButtonGroup";
+import { updateInputOnly } from '@/lib/fetchTypes';
 import CloseIcon from '@mui/icons-material/Close';
 import BrowserUpdatedIcon from '@mui/icons-material/BrowserUpdated';
 import DeletePopUp2 from "@component/comp/DeletePopUp2";
@@ -28,12 +25,11 @@ export default function Question({ input }: mainHeader) {
     const subject = 'question';
     const initQuestion: inputType | null = input.name === subject ? input : null
 
-    const { setFile, file, setSaved, saved, setMsg, msg, setSelect } = React.useContext(InputContext);
-    const { setUser, user, } = React.useContext(GeneralContext);
+    const { setFile, file, setSaved, saved, setSelect } = React.useContext(InputContext);
     const [question, setQuestion] = React.useState<inputType | null>(initQuestion);
     const [openReply, setOpenReply] = React.useState<boolean>(false);
     const [popup, setPopup] = React.useState<boolean>(false);
-    const [deleteUnit, setDeleteUnit] = React.useState<inputType | undefined>()
+
 
     const show = (input.name === subject) ? true : false;
 

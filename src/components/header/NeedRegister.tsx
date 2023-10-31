@@ -1,7 +1,6 @@
 import React from 'react';
 import styles from "./header.module.css";
 import Login from "@component/comp/Login";
-import { userAccountType } from '@/lib/Types';
 
 export default function NeedRegister() {
     const showRef = React.useRef(null);

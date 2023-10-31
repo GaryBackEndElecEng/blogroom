@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
-import { getAllFiles } from "@lib/fetchTypes";
-import { msgType, type fetchAllType, fileType, userType } from "@lib/Types";
+import { getAllFiles, getPosts } from "@lib/fetchTypes";
+import { msgType, type fetchAllType, fileType, userType, postType } from "@lib/Types";
 import Image from "next/image";
 import Link from "next/link";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -9,7 +9,9 @@ import FileItem from "./FileItem";
 import { InputContext } from "@context/InputTypeProvider";
 import Button from '../comp/Button';
 import { GeneralContext } from '../context/GeneralContextProvider';
-import styles from "./allblogs.module.css"
+import styles from "./allblogs.module.css";
+import { getUsers } from "@lib/fetchTypes";
+import Msg from "@component/blog/Msg";
 
 type fetchType = {
     data: { id: string, filename: string }[],
@@ -23,17 +25,27 @@ type slugType = [
     { filename: string }
 ]
 
+type UserBlogType = {
+    get_users: userType[] | undefined,
+}
 
 
-
-export default function AllBlogs({ users }: { users: userType[] }) {
+export default function AllBlogs({ get_users }: UserBlogType) {
     const { allFiles, setAllFiles } = React.useContext(InputContext);
-    const { setPageHit } = React.useContext(GeneralContext)
-
-    const [user, setUser] = React.useState<userType | undefined>();
-    const [fileID, setFileID] = React.useState<string | undefined>();
-
+    const { setPageHit, setUsers, users } = React.useContext(GeneralContext);
     const [msg, setMsg] = React.useState<msgType>({} as msgType);
+    const [tempFiles, setTempFiles] = React.useState<fileType[]>([])
+
+    React.useMemo(async () => {
+        if (get_users) {
+            setUsers(get_users);
+            setMsg({ loaded: true, msg: "loaded" });
+        } else {
+            setMsg({ loaded: false, msg: "no users" });
+        }
+    }, [setUsers, get_users]);
+
+
 
     React.useEffect(() => {
         setPageHit({ page: "/blog", name: "none" });
@@ -47,6 +59,7 @@ export default function AllBlogs({ users }: { users: userType[] }) {
             const allBlogs: fileType[] | undefined = await getAllFiles();
             if (allBlogs) {
                 setMsg({ loaded: true, msg: "recieved" });
+                setTempFiles(allBlogs)
                 return setAllFiles(allBlogs);
             } else {
                 setMsg({ loaded: false, msg: "no blogs" });
@@ -55,12 +68,15 @@ export default function AllBlogs({ users }: { users: userType[] }) {
         await getFiles()
     }, []);
 
-    const container = "allBlog_container mx-auto lg:container flex flex-col p-2 mt-5 gap-3  w-full items-center"
-    const linkContainer = "allBlog_subContainer flex flex-col gap-1 p-1 justify-start items-center w-full grid-cols-1 sm:grid sm:grid-cols-2 sm:place-items-center sm:gap-2 "
+    const container = "allBlog_container mx-auto lg:container flex flex-col p-2 mt-5 gap-3  w-full items-center relative"
+    const linkContainer = "allBlog_subContainer flex flex-col gap-1 p-1 justify-start items-center w-full grid-cols-1 sm:grid sm:grid-cols-2 sm:place-items-center sm:gap-2 overflow-hidden "
 
     return (
         <React.Fragment>
             <div className={container}>
+                <div className="absolute mx-auto top-10 inset-0 h-[20vh]">
+                    <Msg msg={msg} setMsg={setMsg} />
+                </div>
                 <div className="flex justify-center items-center">
                     <blockquote className={`learningIsLiving allBlogs_mainText text-xl sm:text-4xl text-white text-center mx-auto italic mb-3  `}>
                         <q>learnng is living</q>
@@ -68,7 +84,7 @@ export default function AllBlogs({ users }: { users: userType[] }) {
                 </div>
 
                 <section className={linkContainer}>
-                    {allFiles && msg.loaded ? (
+                    {allFiles ? (
                         allFiles.map((item, index) => {
                             if (item.published) {
                                 return (

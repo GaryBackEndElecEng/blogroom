@@ -27,7 +27,7 @@ type mainTemplateType = {
 
 export default function Template1({ account, user }: mainTemplateType) {
     const getCode = gen_uuid();
-    const { file, setFile, saved, setSaved, select, newFileAndInputControlPoint } = React.useContext(InputContext);
+    const { file, saved, select, newFileAndInputControlPoint } = React.useContext(InputContext);
     const [open, setOpen] = React.useState<boolean>(false);
     const [openFile, setOpenFile] = React.useState<boolean>(true);
 

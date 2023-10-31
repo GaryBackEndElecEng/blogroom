@@ -7,26 +7,6 @@ import { getFile } from "@lib/serverGets";
 
 const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site : process.env.NEXT_PUBLIC_local
 
-type params = {
-    fileID: string
-}
-// export async function generateStaticParams(): Promise<params[]> {
-//     // const users: userType[] | [] = await getUsers() as userType[];
-//     const res = await fetch(`${url}/api/getusers`);
-//     const users = await res.json() as userType[]
-//     let arr: { fileID: string }[] = [];
-//     // if (!users) return
-//     users.map((user, index) => {
-//         user.files.map((file) => {
-//             if (file) {
-//                 arr.push({ fileID: file.id })
-//             }
-//         })
-
-
-//     });
-//     return arr
-// }
 
 export default async function page({ params }: { params: { fileID: string } }) {
     //NOTE YOU CAN NOT FETCH USING AXIOS @SERVER LEVEL

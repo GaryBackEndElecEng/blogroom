@@ -1,17 +1,10 @@
 "use client"
 import React from 'react';
 import { InputContext } from "@context/InputTypeProvider";
-import { inputType, inputArr, fileType, msgType } from "@lib/Types";
-import { TextField } from "@mui/material";
-import { saveToStorage, getFromStorage } from "@lib/storePullLocStorage";
+import { inputType, } from "@lib/Types";
 import SavedMsg from "@component/comp/SavedMsg";
-import { inputComponent, inputComponentImage, inputInsertUrl, reduceModAndAddComp, removeComponent } from '@/lib/generalFunc';
-import { addInput, fetchPostImage, saveFile } from '@/lib/fetchTypes';
-import Image from "next/image";
-import { gets3Image } from "@lib/s3ApiComponents";
-
+import { removeComponent } from '@/lib/generalFunc';
 import UploadPreSigned from './UploadPreSigned'
-import ButtonGroup from './ButtonGroup';
 
 type mainHeader = {
     input: inputType

@@ -1,6 +1,5 @@
 import React from 'react';
 import styles from "./footer.module.css";
-import Image from "next/image";
 import BlogMaker from "./BlogMaker";
 
 export default function Footer() {

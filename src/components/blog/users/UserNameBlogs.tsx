@@ -11,23 +11,24 @@ import { usePathname } from "next/navigation";
 
 
 type usernameType = {
-    username: string,
     getuser: userType | undefined
 
 }
-export default function UserNameBlogs({ username, getuser }: usernameType) {
+export default function UserNameBlogs({ getuser }: usernameType) {
     const pathname = usePathname();
     const [usersFiles, setUsersFiles] = React.useState<fileType[] | []>([]);
     const { client, setClient, setPageHit } = React.useContext(GeneralContext);
     const [numFiles, setNumFiles] = React.useState<number>(1);
 
     React.useEffect(() => {
-        if (!pathname) return
-        // console.log(pathname) // returns /blog/usershomelinks/Bob%20Brown
-        const username = pathname.split("/")[3] ? decodeURIComponent(pathname.split("/")[3]) : "none"
-
-        setPageHit({ name: username, page: pathname })
-    }, []);
+        //pathname=>/blog/usershomelinks/Bob%20Brown
+        if (pathname && getuser && getuser.name) {
+            const params = new URLSearchParams();
+            const username = pathname.split("/")[3];
+            params.set(getuser.name, username);
+            setPageHit({ name: getuser.name, page: pathname })
+        }
+    }, [getuser, setPageHit, pathname]);
 
     React.useEffect(() => {
         if (usersFiles) {
@@ -52,7 +53,7 @@ export default function UserNameBlogs({ username, getuser }: usernameType) {
     const title1 = "text-center font-bold text-3xl";
     return (
         <main className="mx-auto lg:container my-2 px-3 mb-3">
-            <h3 className={title}>{username}</h3>
+            <h3 className={title}>{getuser && getuser.name}</h3>
             <h3 className="text-center font-bold text-xl">Welcome</h3>
             <section className=" mx-auto my-2 mb-6 w-full sm:w-7/8 lg:w-3/4 mx-auto px-3">
                 <p className="my-1 sm:px-3 text-xl sm:leading-10">{getuser && getuser.bio}</p>
@@ -63,7 +64,7 @@ export default function UserNameBlogs({ username, getuser }: usernameType) {
                     if (file.published) return (
                         <main key={index} className="col-span-1 card  ">
                             {file.imageUrl && <Image src={file.imageUrl} width={600} height={600} className="aspect-video" alt={`${file.name}-${client && client.name}`} />}
-                            <Link href={`${link}/${client && client.name && encodeURIComponent(client.name)}/${file.id}`} className={flexcol} >
+                            <Link href={`${link}/${client && client.name && client.name.replace(" ", "-")}/${file.id}`} className={flexcol} >
                                 <div className={" m-auto"}>
                                     <h3 className={title1}>{file.title}</h3>
                                     <div className={flexcol}>

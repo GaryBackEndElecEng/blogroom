@@ -2,9 +2,6 @@
 import React from 'react'
 import { GeneralContext } from '../../../context/GeneralContextProvider'
 import { fileType } from '@/lib/Types';
-import { getuserFiles } from '@/lib/fetchTypes';
-import { TextField } from '@mui/material';
-import { SessionProvider } from 'next-auth/react';
 import getFormattedDate from '../../../../lib/getFormattedDate';
 import { Button } from "@mui/material";
 import { useRouter } from 'next/navigation';
