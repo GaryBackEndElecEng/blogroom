@@ -8,7 +8,7 @@ import Section from "@/components/comp/Section";
 import Summary from "@/components/comp/Summary";
 import Conclusion from "@/components/comp/Conclusion";
 import Question from "@/components/comp/Question";
-import File from "@/components/blog/dashboard/template/File";
+import File from "@/components/blog/dashboard/template/FileNOTUSED";
 import SelectImage from "@component/comp/SelectImage";
 import { InputContext } from '../../../context/InputTypeProvider';
 import { gen_uuid } from "@lib/codeGenerator";

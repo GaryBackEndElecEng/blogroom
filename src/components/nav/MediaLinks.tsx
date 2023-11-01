@@ -47,6 +47,7 @@ export default function MediaLinks() {
             window.open(link, "blank")
         }
     }
+
     return (
         <div className={media}>
             {genInfoPlus && genInfoPlus.map((info, index) => (

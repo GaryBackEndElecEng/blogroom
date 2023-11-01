@@ -126,9 +126,10 @@ const Register = ({ genHash }: mainRegisterType) => {
 
                     <label htmlFor="email" className="block text-sm font-medium leading-6">email</label>
 
-                    <input type="text" className="mt-2 shadow shadow-blue bg-white text-black rounded-lg  w-full px-3"
+                    <input className="mt-2 shadow shadow-blue bg-white text-black rounded-lg  w-full px-3"
                         name="email"
                         id="email"
+                        type="email"
                         value={Data && Data.email ? Data.email : ""}
                         onChange={(e) => setData({ ...Data, email: e.target.value })}
                         required

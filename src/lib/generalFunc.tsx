@@ -247,6 +247,18 @@ export function quickFileRemove(file: fileType, input: inputType) {
     tempFile = { ...tempFile, inputTypes: reducerInput }
     return tempFile
 }
+export function removeFile(files: fileType[], fileID: string) {
+    if (!files || !fileID) return
+    const reduceF = files.filter(file => (file.id !== fileID));
+    return reduceF
+
+}
+export function removeUserFile(userfiles: fileType[], fileID: string) {
+    if (!userfiles || !fileID) return
+    const reduceF = userfiles.filter(file => (file.id !== fileID));
+    return reduceF
+
+}
 export function removeDuplicates<type>(arr: type[]): type[] {
     const cleaned = arr.filter((item, index) => (arr.indexOf(item) === index));
     return cleaned

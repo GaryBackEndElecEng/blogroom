@@ -2,7 +2,7 @@
 import React from 'react';
 import { getAllFiles } from "@lib/fetchTypes";
 import { fileType, userType } from '@/lib/Types';
-import UserBlogItem from "@/components/blog/UserBlogItem";
+import UserBlogItem from "@/components/blog/users/UserBlogItem";
 import { getFile } from "@lib/serverGets";
 
 const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site : process.env.NEXT_PUBLIC_local

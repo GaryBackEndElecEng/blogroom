@@ -88,7 +88,7 @@ export default function PostForm({ getAccount, getuser, userFiles }: mainAccType
                 }
             </div>
             <form action="" onSubmit={handleSubmit}
-                className="w-full sm:w-3/4 lg:w-1/2 flex flex-col items-center justify-center gap-1 p-1 mx-auto bg-slate-200 rounded-lg shadow shadow-emerald-300 border border-emerald-900 bg-slate-200 "
+                className="w-full sm:w-3/4 lg:w-1/2 flex flex-col items-center justify-center gap-1 p-1 mx-auto bg-slate-400 rounded-lg shadow shadow-emerald-300 border border-emerald-900 bg-slate-200 "
             >
                 <FormControl className=" text-black w-full mx-auto flex flex-col items-center">
                     <FormLabel htmlFor="name">Name</FormLabel>
@@ -158,7 +158,7 @@ export default function PostForm({ getAccount, getuser, userFiles }: mainAccType
                         })}
                     </select>
                 </FormControl>
-                <button className="button my-2 text-black" type="submit">post it</button>
+                <button className="buttonmd bg-slate-800 my-2 text-white" type="submit">post it</button>
             </form>
         </div>
     )

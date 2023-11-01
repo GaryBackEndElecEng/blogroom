@@ -27,9 +27,8 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
                 files: true
             }
         });
-
         if (user[0]) {
-
+            // console.log(user[0])//works
             const userWithImage = upsertImageUrl(user[0] as userType)
             res.status(200).json(userWithImage)
             await prisma.$disconnect()
@@ -58,7 +57,7 @@ const matchEnd = (s3Key: string) => {
 function upsertImageUrl(user: userType) {
     if (user.imgKey && matchEnd(user.imgKey)) {
         const s3Params = {
-            Bucket: process.env.AWS_BUCKET_NAME as string,
+            Bucket: process.env.BUCKET_NAME as string,
             Key: user.imgKey,
         };
 

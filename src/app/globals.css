@@ -214,15 +214,35 @@ p.paraCreator::first-letter {
     -1.5px -1.5px 10px 3px hsl(154, 97%, 49%);
   border: 1px hsl(154, 97%, 49%);
   border-radius: 30px 30px 30px 30px;
+  transition: all 0.5s ease-in-out;
+}
+.buttonmd {
+  font-size: 90%;
+  padding-inline: 1.55rem;
+  padding-block: 0.5rem;
+  border-radius: 2px 2px 2px 2px;
+  box-shadow: 1.25px 1.25px 7px 1px hsl(154, 97%, 49%),
+    -1.25px -1.25px 7px 1px hsl(154, 97%, 49%);
+  border: 1px hsl(154, 97%, 49%);
+  border-radius: 30px 30px 30px 30px;
+  transition: all 0.5s ease-in-out;
 }
 .buttonsm {
   font-size: 80%;
   padding-inline: 1rem;
   padding-block: 0.15rem;
-  box-shadow: 1px 1px 7px 2px hsl(53, 97%, 49%),
-    -1px -1px 7px 2px hsl(60, 97%, 44%);
+  box-shadow: 1px 1px 5px 1px hsl(53, 97%, 49%),
+    -1px -1px 5px 1px hsl(60, 97%, 44%);
   border: 1px hsl(69, 58%, 95%);
   border-radius: 30px 30px 30px 30px;
+  transition: all 0.5s ease-in-out;
+}
+.button:hover,
+.buttonsm:hover,
+.buttonmd:hover {
+  box-shadow: 1px 1px 12px 1px hsl(152, 32%, 91%),
+    -1px -1px 8px 1px hsl(153, 29%, 87%);
+  transition: all 0.5s ease-in-out;
 }
 /* FOR PARGRAPHMAKER */
 .paraStyle {

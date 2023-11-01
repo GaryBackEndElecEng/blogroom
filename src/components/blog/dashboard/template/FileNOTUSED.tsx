@@ -7,12 +7,13 @@ import Button from "@component/comp/Button";
 import { IconButton, TextField } from "@mui/material";
 import Msg from "@/components/comp/Msg";
 import { saveFile } from "@lib/fetchTypes";
-import DisplayInputTypes from "@/components/blog/dashboard/template/DisplayInputTypes";
+import DisplayInputTypes from "@/components/blog/dashboard/template/DisplayInputTypesNOTUSED";
 import { saveToStorage } from "@lib/storePullLocStorage";
 import SavedMsg from "@component/comp/SavedMsg";
 import { GeneralContext } from '../../../context/GeneralContextProvider';
-import PopUp from "@component/comp/PopUp";
-import OpenFileList from "@/components/blog/dashboard/template/OpenFileList";
+
+
+import OpenFileList from "@/components/blog/dashboard/template/OpenFileListNOTUSED";
 import FileImage from "../../../comp/FileImage";
 import ParagraphCreator from "@component/comp/ParagraphCreator"
 import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
@@ -29,24 +30,25 @@ type mainFile = {
 }
 
 
-
+///!NOTE:!! CHECK TO SEE IF THIS IS USED
 export default function File({ saved, account, setOpen, open, setOpenFile, openFile }: mainFile) {
 
-    const { file, setFile, date, inputArr, setMsg, setSelect, select } = React.useContext(InputContext);
+    const { file, setFile, date, inputArr, setMsg, msg, select } = React.useContext(InputContext);
     const { user } = React.useContext(GeneralContext);
     // const [isSubmit, setIsSubmit] = React.useState<boolean>(false);
     const [signup, setSignup] = React.useState<boolean>(false);
 
 
 
-
-
-
     const handleSubmit = async (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         e.preventDefault();
-        if (!file) return
+        if (!file) return setMsg({ loaded: false, msg: "no file" })
         const check = (account && account.data?.status === "authenticated") ? true : false
         if (!check) return setSignup(true)
+        console.log(file.name)
+        if (file.name === "filename" || !file.name || file.name === "") {
+            return setMsg({ loaded: false, msg: "please enter a filename" })
+        }
         try {
             const svFile: fileType | undefined = await saveFile(file)
             if (!svFile) return setMsg({ loaded: false, msg: "svFile doesn't exist" });
@@ -59,11 +61,7 @@ export default function File({ saved, account, setOpen, open, setOpenFile, openF
         }
 
     }
-    const handleSelectAFile = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        e.preventDefault();
 
-
-    }
     const handleOpenList = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     ) => {
         e.preventDefault();
@@ -80,14 +78,14 @@ export default function File({ saved, account, setOpen, open, setOpenFile, openF
         }
         // console.log("open", open, "openFile", openFile)
     }
+
     const summary = "mx-auto container flex flex-col w-full px-3 py-2"
     const container = "mx-auto lg:container flex flex-col items-center gap-3 justify-evenly lg:w-3/4 w-full "
-    const Form = "mx-auto lg:container flex  flex-col flex-wrap  items-center gap-3 justify-start sm:justify-evenly w-full relative ";
+
     const NameFileName = "showItems flex flex-row justify-evenly items-center flex-wrap mx-auto mt-4 shadow shadow-blue-600 rounded-lg p-2 rounded-xl w-full relative";
-    const textfield = "text-black bg-white rounded-lg border border-blue-900 shadow shadow-white border border-red-900 cursor-pointer ";
-    const textarea = "text-black bg-white rounded-lg border border-blue-900 shadow shadow-white border border-red-900 w-full ";
+
     const select_ = "w-full font-bold flex flex-col flex-wrap gap-1 items-center justify-start px-2"
-    const select2 = "text-black shadow shadow-white rounded-md py-1 px-2 border border-white"
+
     const userInfo = "showItems flex flex-col justify-around items-center flex-wrap mx-auto my-3 shadow shadow-blue-600 rounded-lg p-2 rounded-xl w-full relative"
 
     return (
@@ -130,117 +128,12 @@ export default function File({ saved, account, setOpen, open, setOpenFile, openF
                 }
             </div>
             <small className="text-center font-bold">Date: {date && date.date}</small>
+            <h1>FILE LIST- IS IT SHOWING!!</h1>
 
-            <div className={Form}>
-
-                <div className="mx-auto flex flex-col gap-2">
-                    {user &&
-                        <h4 className={"text-center font-bold"}>{user.name}</h4>
-                    }
-                </div>
-                <div className="mx-auto flex flex-col my-2 text-white">
-                    {file &&
-                        <TextField
-                            id={`${file.id}-${file.name}`}
-                            required
-                            label={"filename"}
-                            name="filename"
-                            aria-label="filename"
-                            // helperText={" name"}
-                            multiline={false}
-                            className={textfield}
-                            size={"small"}
-                            placeholder={"filename"}
-                            type="text"
-                            value={file.name ? file.name : ""}
-                            onChange={(e) => {
-                                // if (!file.name) return
-                                setFile({ ...file, name: e.target.value });
-                            }}
-                        />}
-                </div>
-                <div className="mx-auto flex flex-col my-2 text-white">
-                    {file &&
-                        <TextField
-                            id={`${file.id}-${file.title}`}
-                            required
-                            label={"title"}
-                            name="title"
-                            aria-label="title"
-                            // helperText={" name"}
-                            multiline={false}
-                            className={textfield}
-                            size={"small"}
-                            placeholder={"title,,HOW TOO,WHY,,,USE 5Ws"}
-                            type="text"
-                            value={file.title ? file.title : ""}
-                            onChange={(e) => {
-                                // if (!file.name) return
-                                setFile({ ...file, title: e.target.value });
-                            }}
-                        />}
-                </div>
-                <div className="mx-auto flex flex-col my-2 text-white w-full px-3">
-                    {file &&
-                        <TextField
-                            id={`${file.id}-${file.title}`}
-                            required
-                            label={"summary"}
-                            name="content"
-                            aria-label="summary"
-                            // helperText={" name"}
-                            multiline={true}
-                            minRows={7}
-                            margin={"dense"}
-                            className={textarea}
-                            size={"medium"}
-                            placeholder={"content: HAVE A BOLD STATEMENT TO HOOK"}
-                            type="text"
-                            variant={"filled"}
-                            value={file.content ? file.content : ""}
-                            onChange={(e) => {
-                                // if (!file.name) return
-                                setFile({ ...file, content: e.target.value });
-                            }}
-                        />}
-                </div>
-
-                <div className="mx-auto flex flex-col justify-start gap-2">
-                    <select
-                        id={"select"}
-                        required
-                        name="inputtype"
-                        aria-label="input type"
-                        defaultValue={"select"}
-                        className={select2}
-                        value={select && select !== "select" ? select : undefined}
-                        onChange={(e) => {
-                            setSelect(e.target.value)
-
-                        }}
-                    >
-                        {inputArr.map((type, index) => {
-                            if (type === "select") {
-                                return (
-                                    <option key={index}>select type</option>
-                                )
-                            } else {
-                                return (
-                                    <React.Fragment key={index}>
-                                        <option value={type} key={index}>{index + 1}.{type}</option>
-                                    </React.Fragment>
-
-                                )
-                            }
-                        })}
-                    </select>
-                </div>
-                <PopUp signup={signup} setSignup={setSignup} />
-            </div>
 
 
             <div className="mx-auto my-2 mt-4 " onClick={(e) => handleSubmit(e)}>
-                <Msg />
+                <Msg msg={msg} setMsg={setMsg} />
                 <Button tracking={true} border={true} color={"emerald"} >submit</Button>
             </div>
 
@@ -264,3 +157,4 @@ export default function File({ saved, account, setOpen, open, setOpenFile, openF
         </div>
     )
 }
+

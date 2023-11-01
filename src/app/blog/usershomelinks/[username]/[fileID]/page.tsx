@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { fileType, userType } from '@/lib/Types';
-import UserBlogItem from "@/components/blog/UserBlogItem";
+import UserBlogItem from "@/components/blog/users/UserBlogItem";
 import { getFile, } from "@lib/serverGets";
 import { Metadata, ResolvingMetadata } from 'next';
 

@@ -7,11 +7,14 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { GeneralContext } from '@/components/context/GeneralContextProvider';
 import { getUserPosts, user_files } from "@lib/fetchTypes";
 import DashBoardOptions from "@/components/blog/dashboard/DashBoardOptions";
-import GenFileItem from "@/components/blog/dashboard/template/GenFileItem";
+import GenFileItem from "@/components/blog/dashboard/GenFileItem";
 import Link from 'next/link';
 import DashBoardOptionBio from "@/components/blog/dashboard/DashBoardOptionBio";
 import { usePathname } from "next/navigation";
 import { InputContext } from '@/components/context/InputTypeProvider';
+import { IconButton } from '@mui/material';
+import { AiFillDelete } from "react-icons/ai";
+import DeleteFilePopup from "@component/blog/dashboard/DeleteFilePopup";
 
 type mainContextType = {
     account: userAccountType,
@@ -22,6 +25,7 @@ export default function DashBoard({ account, getuser }: mainContextType) {
     const { setPageHit, setUser, user, setUserPosts, userPosts } = React.useContext(GeneralContext);
     const { setUserFiles, userFiles } = React.useContext(InputContext);
     const [cols, setCols] = React.useState<number>(0);
+    const [openDelete, setOpenDelete] = React.useState<{ loaded: boolean, id: string | null }>({ loaded: false, id: null });
 
     React.useEffect(() => {
         if (!pathname || !user || !user.name) return
@@ -58,6 +62,12 @@ export default function DashBoard({ account, getuser }: mainContextType) {
     const button = "flex flex-row justify-center items-center px-5 py-1 bg-emarald-600 shadow shadow-orange-500 border border-orange-800 rounded-full"
     const grid = cols < 3 ? ("mx-auto grid grid-cols-1 sm:grid-cols-2") : cols < 2 ? (" mx-auto grid grid-cols-1 ") : (" mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3")
 
+    const handleDeleteFile = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, fileID: string) => {
+        e.preventDefault();
+        console.log("hit", fileID)
+        setOpenDelete({ loaded: true, id: fileID })
+    }
+
     if (account.loaded) {
         return (
             <div className="mx-auto md:container">
@@ -81,7 +91,19 @@ export default function DashBoard({ account, getuser }: mainContextType) {
                     <div className={grid}>
                         {
                             userFiles && userFiles.length!! && userFiles.map((file, index) => (
-                                <div className="card" key={index}>
+                                <div className="card relative" key={index}>
+
+                                    {(openDelete.loaded && openDelete.id === file.id) && <DeleteFilePopup
+                                        fileID={file.id}
+                                        setOpenDelete={setOpenDelete}
+                                        openDelete={openDelete}
+                                    />}
+
+                                    <div className="absolute right-2 top-2 z-20000" onClick={(e) => handleDeleteFile(e, file.id)}>
+                                        <IconButton>
+                                            <AiFillDelete style={{ color: "red", fontSize: "110%" }} />
+                                        </IconButton>
+                                    </div>
                                     <GenFileItem get_file={file} />
                                     <Link href={`/blog/dashboard/template/${file.id}`}>
                                         <button className={button}>edit</button>

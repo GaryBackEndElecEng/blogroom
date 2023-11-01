@@ -7,7 +7,7 @@ import InsertInputContext from "@component/blog/dashboard/InsertInputContext";
 
 const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site : process.env.NEXT_PUBLIC_local
 
-
+///PATH TO EDIT THE CLIENT'S FILE FROM DASHBOARD BUTTON-EDIT
 export default async function FileHandle({ params }: { params: { file_ID: string } }) {
     const { file_ID } = params;
     const file = await getFile(file_ID);

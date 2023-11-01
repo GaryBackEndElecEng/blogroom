@@ -1,6 +1,6 @@
 "use client"
 import React from 'react'
-import Template1 from "@/components/blog/dashboard/template/Template1";
+import Template1 from "@/components/blog/dashboard/template/Template1NOTUSED";
 import InputTypeProvider, { InputContext } from "@context/InputTypeProvider";
 import { userAccountType, userType, } from '@/lib/Types';
 import { GeneralContext } from '@/components/context/GeneralContextProvider';

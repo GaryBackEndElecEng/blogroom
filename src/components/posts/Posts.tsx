@@ -58,16 +58,18 @@ export default function Posts({ get_users, get_posts }: mainType) {
     return (
         <React.Fragment>
             <Header />
-            <div className="lg:container mx-auto px-1 sm:px-0 my-2 relative">
-                <div className="absolute mx-auto top-10 inset-0 h-[10vh]">
-                    <Msg msg={message} setMsg={setMessage} />
+            <div className="lg:container mx-auto px-1 sm:px-0 my-2 ">
+                <div className="relative h-[10vh]">
+                    <div className="absolute mx-auto top-0 inset-0">
+                        <Msg msg={message} setMsg={setMessage} />
+                    </div>
+                    {/* <div className="absolute mx-auto top-15 inset-0 ">
+                        <Msg msg={msg} setMsg={setMsg} />
+                    </div> */}
                 </div>
-                <div className="absolute mx-auto top-10 inset-0 h-[20vh]">
-                    <Msg msg={msg} setMsg={setMsg} />
-                </div>
-                <div className="flex flex-col mx-auto min-h-[15vh] justify-center align-center mb-3">
+                <div className="flex flex-col mx-auto min-h-[10vh] justify-center align-center mb-3">
                     <Link href={"posts/makeapost"} className="mx-auto">
-                        <button className="button">make a post</button>
+                        <button className="button">makeapost</button>
                     </Link>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-2 lg:gap-6 mx-auto my-2 px-2 sm:px-3">

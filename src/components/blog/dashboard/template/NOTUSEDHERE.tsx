@@ -9,6 +9,7 @@ type mainContextType = {
     account: userAccountType | undefined,
     getuser: userType | undefined
 }
+// USER'S DASHBOARD DISPLAYS ALL OF DASHBOARD!!!!!!!!
 export default function InputContextInsert({ account, getuser }: mainContextType) {
     if (account && account.data && getuser) {
         return (

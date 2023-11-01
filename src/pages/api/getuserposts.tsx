@@ -36,13 +36,15 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
                 const retFiles = arr.map(post => insertUrlPost(post));
                 res.status(200).json(retFiles);
             } else {
-                res.status(404).json({ message: "no posts" });
+                res.status(404).json({ message: "no posts from getuserposts" });
                 await prisma.$disconnect()
             }
+        } else {
+            res.status(404).json({ message: "no user found from getuserposts" })
         }
 
     } catch (error) {
-        throw new Error("server error from api/getuserfiles()")
+        throw new Error("server error from api/getuserposts()")
     } finally {
         await prisma.$disconnect()
     }

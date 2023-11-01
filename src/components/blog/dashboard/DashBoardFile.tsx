@@ -13,6 +13,7 @@ import SavedMsg from "@component/comp/SavedMsg";
 import PopUp from "@component/comp/PopUp";
 import FileImage from "@component/comp/FileImage";
 import ParagraphCreator from "@component/comp/ParagraphCreator"
+import DashBoardFileForm from "@component/blog/dashboard/DashBoardFileForm";
 
 
 
@@ -28,7 +29,7 @@ type mainFile = {
 
 
 export default function DashBoardFile({ setSaved, saved, user, file }: mainFile) {
-    const { setFile, date, inputArr, setMsg, newFileAndInputControlPoint } = React.useContext(InputContext);
+    const { setFile, date, inputArr, setMsg, msg, newFileAndInputControlPoint } = React.useContext(InputContext);
     const [select_2, setSelect_2] = React.useState<string>("select");
     const [signup, setSignup] = React.useState<boolean>(false);
 
@@ -38,16 +39,21 @@ export default function DashBoardFile({ setSaved, saved, user, file }: mainFile)
         if (!file) return
         const check = (user && user.email) ? true : false
         if (!check) return setSignup(true)
-        try {
-            const svFile: fileType | undefined = await saveFile(file)
-            if (!svFile) return
-            setMsg({ loaded: true, msg: "file saved" });
-            saveToStorage(svFile);
-            setFile(svFile)
-            setSaved({ loaded: true, msg: "saved" })
+        const checkFile = (file.name || file.name !== "") ? true : false;
+        if (checkFile) {
+            try {
+                const svFile: fileType | undefined = await saveFile(file)
+                if (!svFile) return setMsg({ loaded: false, msg: "was not saved" });
+                setMsg({ loaded: true, msg: "file saved" });
+                saveToStorage(svFile);
+                setFile(svFile)
+                setSaved({ loaded: true, msg: "saved" })
 
-        } catch (error) {
-            setMsg({ loaded: false, msg: "could not store on submit" });
+            } catch (error) {
+                setMsg({ loaded: false, msg: "file was not saved" });
+            }
+        } else {
+            setMsg({ loaded: false, msg: "please enter a filename" })
         }
 
     }
@@ -93,72 +99,13 @@ export default function DashBoardFile({ setSaved, saved, user, file }: mainFile)
                         <h4 className={"text-center font-bold"}>{user.name}</h4>
                     }
                 </div>
-                <div className="mx-auto flex flex-col my-2 text-white">
-                    {file &&
-                        <TextField
-                            id={`${file.id}-${file.name}`}
-                            required
-                            label={"filename"}
-                            name="filename"
-                            aria-label="filename"
-                            // helperText={" name"}
-                            multiline={false}
-                            className={textfield}
-                            size={"small"}
-                            placeholder={"filename"}
-                            type="text"
-                            value={file.name ? file.name : ""}
-                            onChange={(e) => {
-                                // if (!file.name) return
-                                setFile({ ...file, name: e.target.value });
-                            }}
-                        />}
-                </div>
-                <div className="mx-auto flex flex-col my-2 text-white">
-                    {file &&
-                        <TextField
-                            id={`${file.id}-${file.title}`}
-                            required
-                            label={"title"}
-                            name="title"
-                            aria-label="title"
-                            // helperText={" name"}
-                            multiline={false}
-                            className={textfield}
-                            size={"small"}
-                            placeholder={"title"}
-                            type="text"
-                            value={file.title ? file.title : ""}
-                            onChange={(e) => {
-                                // if (!file.name) return
-                                setFile({ ...file, title: e.target.value });
-                            }}
-                        />}
-                </div>
-                <div className="mx-auto flex flex-col my-2 text-white w-full px-3">
-                    {file &&
-                        <TextField
-                            id={`${file.id}-${file.title}`}
-                            required
-                            label={"summary"}
-                            name="content"
-                            aria-label="summary"
-                            // helperText={" name"}
-                            multiline={true}
-                            minRows={7}
-                            margin={"dense"}
-                            className={textarea}
-                            size={"medium"}
-                            placeholder={"content"}
-                            type="text"
-                            variant={"filled"}
-                            value={file.content ? file.content : ""}
-                            onChange={(e) => {
-                                // if (!file.name) return
-                                setFile({ ...file, content: e.target.value });
-                            }}
-                        />}
-                </div>
+                <DashBoardFileForm
+                    setFile={setFile}
+                    file={file}
+                    user={user}
+                    signup={signup}
+                    setSignup={setSignup}
+                />
 
                 <div className="mx-auto flex flex-row justify-evenly items-center gap-2">
                     <select
@@ -196,7 +143,7 @@ export default function DashBoardFile({ setSaved, saved, user, file }: mainFile)
 
 
             <div className="mx-auto my-2 mt-4 " onClick={(e) => handleSubmit(e)}>
-                <Msg />
+                <Msg setMsg={setMsg} msg={msg} />
                 <Button tracking={true} border={true} color={"emerald"} >submit</Button>
             </div>
 

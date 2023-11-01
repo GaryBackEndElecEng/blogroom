@@ -3,22 +3,24 @@ import React from 'react';
 import { Heading, Section, Summary, SubHeading, Conclusion, type_, ImageJsx, FileContent, Question, HLink, ListComp } from "@blogElement/elements";
 import type { fetchSingleFileType, fileType, msgType, userType } from "@lib/Types";
 import { inputArr } from "@lib/Types";
-import Button from '../comp/Button';
+import Button from '../../comp/Button';
 import Link from 'next/link';
 import getFormattedDate from "@lib/getFormattedDate";
 import Image from 'next/image';
 // import { InputContext } from '../context/InputTypeProvider';
-import { GeneralContext } from '../context/GeneralContextProvider';
+import { GeneralContext } from '../../context/GeneralContextProvider';
 import { usePathname } from "next/navigation";
-import UserSignatureBlock from "./UserSignatureBlock";
+import UserSignatureBlock from "../UserSignatureBlock";
 import BlogLike from "@component/blog/BlogLike";
 import FileRate from "@component/blog/FileRate";
 import { getUser } from '@/lib/fetchTypes';
+import { BsHandThumbsUpFill } from "react-icons/bs";
 
 
 type mainBlogItemType = {
     file: fileType
 }
+//////////NOTE!! THIS IS FROM blog/usershomelinks/username/fileID/////////
 
 export default function UserBlogItem({ file }: mainBlogItemType) {
     const pathname = usePathname();
@@ -90,7 +92,13 @@ export default function UserBlogItem({ file }: mainBlogItemType) {
                     })
                 }
             </div>
-            <h3 className="text-xl text-center mb-3 underline underline-offset-8 text-slate-300"> <span className="text-slate-100">Rate Me</span> -<q className="italic"> rating helps what you want</q></h3>
+            <h3 className="text-orange-100 text-3xl mt-[5vh] underline underline-offset- text-center">Rate Me !</h3>
+            <div className="text-xl text-center mb-[5vh]  underline underline-offset-8 text-slate-300 flex flex-row flex-wrap justify-center items-center">
+
+                <q className="italic">
+                    rating helps us find what you want</q>
+                <BsHandThumbsUpFill style={{ color: "gold", marginLeft: 2 }} />
+            </div>
             <div className="flex flex-col justify-center items-center prose prose-md px-3 mx-auto ">
                 <BlogLike file={file} />
             </div>

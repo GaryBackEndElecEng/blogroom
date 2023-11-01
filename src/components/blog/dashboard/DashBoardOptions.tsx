@@ -15,6 +15,7 @@ import GetLinkHits from "@component/blog/dashboard/GetLinkHits";
 // import LikesAndRates from "@component/blog/dashboard/LikesAndRates";
 import FileLikesRates from "@component/blog/dashboard/FileLikesRates";
 import PostLikesRates from "@component/blog/dashboard/PostLikesRates";
+import { useRouter } from "next/navigation";
 
 
 type mainDashOptionType = {
@@ -57,10 +58,12 @@ export default function DashBoardOptions({ userFiles, userPosts, account, }: mai
 
     }
 
+
     const buttonContactStyle = contact ? " contactbuttonshow flex flex-col items-center my-2 px-2 " : "contactbuttonhide flex flex-col items-center my-2 px-2";
     const button = "border border-orange-300 px-3 py-auto text-sm rounded-full shadow shadow-orange-500 hover:tracking-wide"
     const button2 = "border border-orange-300 px-3 py-auto text-sm rounded-full shadow shadow-orange-500 flex flex-row flex-wrap gap-2 hover:tracking-wide"
     const button3 = "border border-orange-300 px-3 py-auto text-sm rounded-xl shadow shadow-white flex flex-row flex-wrap gap-2 hover:tracking-wide text-slate-100 bg-black z-1000"
+
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-2 lg:gap-3 mx-auto my-2">
@@ -71,6 +74,13 @@ export default function DashBoardOptions({ userFiles, userPosts, account, }: mai
                     <h5 className="text-center">give clients options</h5>
                     <UserPageHit files={userFiles} />
                     <GetLinkHits files={userFiles} />
+                </div>
+                <div className="flex flex-col my-2 mx-auto justisfy-center items-center">
+                    <h3 className="text-center text-xl text-orange-300">Create a post?</h3>
+                    <h6 className="text-center text-slate-200">to promote your blog</h6>
+                    <Link href={"/posts"}>
+                        <button className="buttonmd mt-3 mb-1 bg-slate-800 text-black" style={{ color: "white" }}>makapost</button>
+                    </Link>
                 </div>
             </div>
             <div className="bg-slate-600 py-4 px-2">

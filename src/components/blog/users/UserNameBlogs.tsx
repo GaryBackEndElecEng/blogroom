@@ -59,11 +59,13 @@ export default function UserNameBlogs({ getuser }: usernameType) {
                 <p className="my-1 sm:px-3 text-xl sm:leading-10">{getuser && getuser.bio}</p>
             </section>
 
+            <h3 className="text-center text-[white]  underline underline-offset-8 text-2xl my-3 mb-[3vh]">blogs</h3>
+
             <section className={numFiles && numFiles === 1 ? `grid grid-cols-1 mx-auto my-2 gap-4 mx-auto px-3` : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mx-auto my-2 gap-4 mx-auto sm:px-3 mb-4"}>
                 {usersFiles && usersFiles.map((file, index) => {
                     if (file.published) return (
                         <main key={index} className="col-span-1 card  ">
-                            {file.imageUrl && <Image src={file.imageUrl} width={600} height={600} className="aspect-video" alt={`${file.name}-${client && client.name}`} />}
+                            {file.imageUrl && <Image src={file.imageUrl} width={600} height={400} className="aspect-video" alt={`${file.name}-${client && client.name}`} />}
                             <Link href={`${link}/${client && client.name && client.name.replace(" ", "-")}/${file.id}`} className={flexcol} >
                                 <div className={" m-auto"}>
                                     <h3 className={title1}>{file.title}</h3>

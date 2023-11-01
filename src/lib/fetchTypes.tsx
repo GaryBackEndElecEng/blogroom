@@ -381,120 +381,13 @@ export async function getPostLikes() {
     }
 }
 
+export async function deleteFile(fileID: string) {
+    if (!fileID) return
+    try {
+        const { data } = await axios.get(`/api/deletefile?fileID=${fileID}`);
+        const delFile = await data as fileType;
+        return delFile;
+    } catch (error) {
 
-
-//------NOTE VERIFY TEH BELOW- SEPARATE THE MD FILES FROM THE JSON FILES USING FA.READDIRSYNC(),FS.READFILESYNC()
-
-
-export async function fetchTemplateData(file: fileType) {
-    if (!file) return
-    const sendFile = JSON.stringify(file);
-    const options = {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-        body: sendFile
     }
-    const res = await fetch("/api/templatedata", options);
-    const body: { status: number, message: string } = await res.json();
-    if (res.ok) {
-        localStorage.setItem(`${file.id}`, sendFile)
-    }
-
-    return body
-}
-
-export async function sendForm(form: paramsType) {
-    const options = {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-        body: JSON.stringify(form)
-    }
-    const res = await fetch("api/form/", options);
-    const body: { status: number, message: string } = await res.json();
-
-    return body
-}
-export async function fetchFiles() {
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-    }
-    const res = await fetch("api/get_htmls/", options);
-    // console.log(await res.json())
-    if (!res.ok) {
-        const body: fetchFilesType = await res.json();
-        return body
-    } else {
-
-        const body: fetchFilesType = await res.json()
-        return body
-    }
-
-}
-
-export async function fetchAllJsonFiles() {
-    const options = {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-    }
-    const res = await fetch("/api/get_j_files", options);
-    const body: fetchAllType = await res.json();
-
-    if (body) {
-        return body
-    }
-
-
-}
-export async function fetchGetJsonFile(id: string, file: string) {
-    const options = {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-        body: JSON.stringify({ id, file })
-    }
-    const res = await fetch("/api/postjsonfile/", options);
-    const body: fetchSingleFileType = await res.json();
-    // console.log(id, file, body)//content needs to be parsed
-    if (body.status === 200) {
-        return { message: "ok", data: body }
-    } else {
-        const data: string[] = []
-        return { message: " bad request", data: data }
-    }
-
-
-}
-// BELOW IS NOT USED=> USING S3 BUCKETS ( BECAUSE OF process.cwd(),fs conflict with formdata()=> buffer() is using process.cwd/fs )
-export async function fetchPostImage(file: File, key: string) {
-    const ext = file.type.split("/")[1]
-    const formData = new FormData();
-    formData.set("image", file);
-    formData.set("key", key);
-    formData.set("type", file.type);
-    const options = {
-        method: "POST",
-        body: formData
-    };
-    const res = await fetch("/api/postImage/", options);
-    const body: { message: string } = await res.json();
-    if (!res.ok) {
-        return { message: body.message }
-    }
-
-    return body.message
 }

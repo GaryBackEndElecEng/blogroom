@@ -48,7 +48,7 @@ export default function MakeAPost({ getAccount, getuser, getuserfiles }: mainAcc
 
     return (
         <div className="lg:container mx-auto px-1 sm:px-0 my-2">
-            <div className="flex flex-col items-center justify-center gap-1 py-1 mx-auto ">
+            <div className="flex flex-col items-center justify-center gap-1 py-1 mx-auto w-full ">
                 <PostForm
                     getAccount={account}
                     getuser={user}

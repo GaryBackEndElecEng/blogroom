@@ -2,7 +2,6 @@
 import React from 'react';
 import Button from "@/components/comp/Button";
 import { msgType, paramsType } from '@/types_';
-import { sendForm } from "@lib/fetchTypes";
 import { v4 as uuidv4 } from 'uuid';
 
 export default function MainAdmin() {
@@ -23,20 +22,7 @@ export default function MainAdmin() {
 
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    insertID(data.filename);
-    if (data.id && data.date && data.filename) {
-      const res = await sendForm(data);
-      if (res.status !== 200) {
-        setMsg({ loaded: false, msg: res.message })
-      } else {
-        setMsg({ loaded: true, msg: res.message })
-      }
-    } else {
-      setMsg({ loaded: false, msg: "you forgot the filename or date. Theses are required" })
-    }
-  }
+
 
 
   return (
@@ -44,7 +30,7 @@ export default function MainAdmin() {
       {msg.loaded ? (
         <h3 className="text-center text-blue-800">{msg.msg}</h3>
       ) : (<h3 className="text-center text-red-800">{msg.msg}</h3>)}
-      <form onSubmit={(e) => handleSubmit(e)}
+      <form
         className="flex flex-col items-center justify-evenly w-3/4"
       >
         <fieldset className="m-auto flex flex-col items-center justify-evenly gap-3 bg-slate-400 ">

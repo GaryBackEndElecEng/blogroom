@@ -1,6 +1,6 @@
 "use server"
 import React from 'react';
-import InputContextInsert from "@component/blog/dashboard/template/InputContextInsert"
+import InputContextInsert from "@/components/blog/dashboard/template/NOTUSEDHERE"
 import { getUserAccount, getUsers } from "@lib/serverGets";
 
 

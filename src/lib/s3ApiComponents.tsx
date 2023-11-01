@@ -216,11 +216,11 @@ export function insertUrls(file: fileType) {
         "getObject", s3Params
     );
     tempFile.imageUrl = imageUrl;
-    if (!tempFile.inputTypes) return tempFile
+    if (!tempFile.inputTypes || !(tempFile.inputTypes?.length > 0)) return tempFile
     tempFile.inputTypes.map((input, index) => {
         if (!input.s3Key) return input
         let checkS3 = checkS3KeyEnd(input.s3Key)
-        if (!checkS3) return input
+        if (!checkS3 || input.name !== "image") return input
         const s3Params = {
             Bucket: process.env.BUCKET_NAME as string,
             Key: input.s3Key,
