@@ -1,10 +1,11 @@
 import React from 'react';
 import type { gets3ProfilePicType, upload3ProfilePicType, userType } from "@lib/Types";
-import { getS3ProfilePic, uploadProfileToS3 } from "@lib/s3ApiComponents";
+import { uploadProfileToS3 } from "@lib/s3ApiComponents";
 import { GeneralContext } from '@context/GeneralContextProvider';
 import { Button } from "@chakra-ui/react";
 import Image from 'next/image';
 import { saveUser } from "@lib/fetchTypes";
+
 
 type mainType = {
     setData: React.Dispatch<React.SetStateAction<userType>>,
@@ -23,17 +24,17 @@ export default function UploadDisplayPic({ Data, setData }: mainType) {
         e.preventDefault();
         if (!Data) return
         setIsLoading(true)
-        const body = await uploadProfileToS3(e, Data) as upload3ProfilePicType | undefined
+        const body = await uploadProfileToS3(e, Data) as gets3ProfilePicType | undefined
         if (!body) {
             return setMsg({ loaded: false, msg: "upload failed" })
         }
         setMsg({ loaded: true, msg: "uploaded" })
-        const { key, msg } = body
+        const { key, imageUrl } = body
         const modUser = { ...Data, imgKey: key } as userType;
         setKey(key);
         setData(modUser)
         setIsLoading(false)
-        setTempImg(null)
+        setTempImg(imageUrl)
 
     }
 
@@ -72,14 +73,11 @@ export default function UploadDisplayPic({ Data, setData }: mainType) {
             </form>
 
             <div className="flex flex-col justify-center items-center mt-2">
-                {(tempImg && !s3Image) ?
+                {tempImg &&
                     (
                         <Image src={tempImg} width={75} height={75} alt="www.garymasterconnect.ca" className={cirImage} />
                     )
-                    :
-                    s3Image && (
-                        <Image src={s3Image} width={75} height={75} alt="www.garymasterconnect.ca" className={cirImage} />
-                    )
+
                 }
             </div>
         </div>

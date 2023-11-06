@@ -5,7 +5,7 @@ import prisma from "@_prisma/client";
 
 export default async function handleLink(req: NextApiRequest, res: NextApiResponse) {
     const link = req.body as linkType
-    console.log(link)
+    // console.log(link)
     if (link && link.id) {
         try {
             const getLink = await prisma.link.update({

@@ -168,7 +168,7 @@ export type gets3ImageType={
 }
 export type gets3ProfilePicType={
   imageUrl: string;
-    Key: string;
+    key: string;
 }
 export type upload3ProfilePicType={
   msg: string;
@@ -298,4 +298,8 @@ export type genInfoType={
   name:string,
   url:string,
   desc:string
+}
+export type s3mediaType={
+  url:string,
+  Key:string
 }

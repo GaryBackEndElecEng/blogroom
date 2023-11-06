@@ -1,16 +1,24 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@_prisma/client";
-import { insertUrls, retUrlInserts } from "@lib/s3ApiComponents";
-import { fileType, userType, userTypeShort } from "@/lib/Types";
-import S3 from "aws-sdk/clients/s3";
+import { userType } from "@/lib/Types";
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import "@aws-sdk/signature-v4-crt";
 
-const s3 = new S3({
-    apiVersion: "2006-03-01",
-    accessKeyId: process.env.SDK_ACCESS_KEY,
-    secretAccessKey: process.env.SDK_ACCESS_SECRET,
-    region: process.env.BUCKET_REGION,
-    signatureVersion: "v4"
-})
+const Bucket = process.env.BUCKET_NAME as string
+const region = process.env.BUCKET_REGION as string
+const accessKeyId = process.env.SDK_ACCESS_KEY as string
+const secretAccessKey = process.env.SDK_ACCESS_SECRET as string
+
+export const s3 = new S3Client({
+    region,
+    credentials: {
+        accessKeyId,
+        secretAccessKey
+    }
+
+});
+
 
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
     const username: string = req.query.username as string;
@@ -23,13 +31,13 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
 
             skip: 0,
             take: 1,
-            include: {
-                files: true
-            }
+            // include: {
+            //     files: true
+            // }
         });
         if (user[0]) {
             // console.log(user[0])//works
-            const userWithImage = upsertImageUrl(user[0] as userType)
+            const userWithImage = insertImgUser(user[0] as userType)
             res.status(200).json(userWithImage)
             await prisma.$disconnect()
         } else {
@@ -43,30 +51,15 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     }
 }
 
-const matchEnd = (s3Key: string) => {
-    let arr: string[] = [".png", ".jpeg", ".Web", "PNG", "JPEG"]
-    let check: boolean = false;
-    arr.forEach((end, index) => {
-        if (s3Key?.endsWith(end)) {
-            return check = true
-        }
-    });
-    return check
-}
+export async function insertImgUser(user: userType) {
 
-function upsertImageUrl(user: userType) {
-    if (user.imgKey && matchEnd(user.imgKey)) {
-        const s3Params = {
-            Bucket: process.env.BUCKET_NAME as string,
-            Key: user.imgKey,
-        };
-
-        user.image = s3.getSignedUrl(
-            "getObject", s3Params
-        );
-
-        return user
-    } else {
-        return user
+    if (!user.imgKey) return user
+    const params = {
+        Key: user.imgKey,
+        Bucket
     }
+    const command = new GetObjectCommand(params);
+    const userimage = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    user.image = userimage;
+    return user
 }

@@ -2,6 +2,7 @@ import prisma from "@_prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { insertUrlPost } from "@lib/s3ApiComponents"
 import { postType } from "@/lib/Types";
+import "@aws-sdk/signature-v4-crt"
 
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
 
@@ -27,7 +28,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
         })
 
         if (post) {
-            const insertPost = insertUrlPost(post as postType);
+            const insertPost = await insertUrlPost(post as postType);
             res.status(200).json(insertPost)
         } else {
             res.status(400).json({ message: "could not find the post @ sendpost?" })

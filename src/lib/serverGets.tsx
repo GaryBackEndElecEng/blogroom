@@ -1,64 +1,97 @@
+
+
 import prisma from "@_prisma/client";
 import { fileType, postType, userAccountType, userType } from "@lib/Types";
-import S3 from "aws-sdk/clients/s3";
-import { insertUrls, retUrlInserts, getProfilePic, insertUrlPosts, insertUrlPost } from "@lib/s3ApiComponents";
 import { getServerSession } from "next-auth";
 import authOptions from "./authOptions";
+import "@aws-sdk/signature-v4-crt"
+import { getEmailUser, getUser } from "./fetchTypes";
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import "@aws-sdk/signature-v4-crt";
 
-const s3 = new S3({
-    apiVersion: "2006-03-01",
-    accessKeyId: process.env.SDK_ACCESS_NAME,
-    secretAccessKey: process.env.SDK_ACCESS_SECRET,
-    region: process.env.BUCKET_NAME,
-    signatureVersion: "v4"
+const Bucket = process.env.BUCKET_NAME as string
+const region = process.env.BUCKET_REGION as string
+const accessKeyId = process.env.SDK_ACCESS_KEY as string
+const secretAccessKey = process.env.SDK_ACCESS_SECRET as string
+
+export const s3 = new S3Client({
+    region,
+    credentials: {
+        accessKeyId,
+        secretAccessKey
+    }
+
 });
 
+//THIS HAS ALL POSTS AND FILES WITH PICS
+export async function getUser_(): Promise<userType | undefined> {
 
-export async function getUsers() {
-    try {
-        const users = await prisma.user.findMany();
-        const body: userType[] | [] = users as userType[]
-        const insertS3Img: userType[] = body.map((user, index) => {
-            let tempUser = user;
-            if (user.imgKey) {
-                let imageURL = getProfilePic(user.imgKey);
-                if (imageURL) {
-                    tempUser = { ...user, image: imageURL as string };
-                    return tempUser
-                } else {
-                    return tempUser
-                }
-
-            } else {
-
-                return tempUser
-            }
-
-        });
-        await prisma.$disconnect()
-        return insertS3Img
-    } catch (error) {
-        throw new Error("issues getting users")
-    } finally {
-        await prisma.$disconnect()
-    }
-}
-
-export async function getUser() {
     const session = await getServerSession(authOptions);
     if (!session || !session.user) return
     if (session.user && session.user.email) {
+        const email = session.user.email;
         try {
             const user = await prisma.user.findUnique({
                 where: {
-                    email: session.user.email
+                    email: email
+                },
+                include: {
+                    files: true,
+                    posts: true
                 }
             });
-            const valUser: userType = user as userType
-            let url: string | null = getProfilePic(valUser.imgKey as string)
-            const insertS3Img: userType = { ...valUser, image: url ? url : undefined }
 
-            return insertS3Img
+            if (user) {
+                let user1: userType = user as userType;
+                if (user1.imgKey) {
+                    const params = {
+                        Bucket,
+                        Key: user1.imgKey
+                    }
+                    const command = new GetObjectCommand(params);
+                    user1.image = await getSignedUrl(s3, command, { expiresIn: 3600 });
+                }
+                if (user1.files && user1.files.length!!) {
+                    const userfiles = await Promise.all(
+                        user1.files.map(async (file) => {
+                            if (file.imageKey && check(file.imageKey)) {
+
+                                const params = {
+                                    Bucket,
+                                    Key: file.imageKey
+                                }
+                                const command = new GetObjectCommand(params);
+                                file.imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+                                return file
+                            } else {
+                                return file
+                            }
+                        })
+                    );
+                    return { ...user1, files: userfiles }
+                } if (user1.posts && user1.posts.length!!) {
+                    const userPosts = await Promise.all(
+                        user1.posts.map(async (post) => {
+                            if (post.s3Key && check(post.s3Key)) {
+
+                                const params = {
+                                    Bucket,
+                                    Key: post.s3Key
+                                }
+                                const command = new GetObjectCommand(params);
+                                post.imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+                                return post
+                            } else {
+                                return post
+                            }
+                        })
+                    );
+                    return { ...user1, posts: userPosts }
+                }
+
+                return user1
+            }
         } catch (error) {
             throw new Error("issues getting users")
         } finally {
@@ -66,18 +99,31 @@ export async function getUser() {
         }
     }
 }
-export async function getUserPostDetail(userId: string) {
-    if (!userId) return
+export async function getPostDetail(postId: number): Promise<postType | undefined> {
+
+    if (!postId) return
     try {
-        const user = await prisma.user.findUnique({
+        const post = await prisma.post.findUnique({
             where: {
-                id: userId
+                id: postId
+            },
+            include: {
+                likes: true,
+                rates: true
             }
         });
-        const valUser: userType = user as userType
-        let url: string | null = getProfilePic(valUser.imgKey as string)
-        const user_insertS3Img: userType = { ...valUser, image: url ? url : undefined }
-        return user_insertS3Img
+        if (post) {
+            let post1: postType = post;
+            if (post1.s3Key) {
+                const params = {
+                    Key: post1.s3Key,
+                    Bucket
+                }
+                const command = new GetObjectCommand(params);
+                post1.imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+            }
+            return post1
+        }
     } catch (error) {
         throw new Error("issues getting users")
     } finally {
@@ -85,26 +131,57 @@ export async function getUserPostDetail(userId: string) {
     }
 
 }
-export async function getFile(fileID: string) {
+
+export async function getFileDetail(fileId: string): Promise<fileType | undefined> {
+    if (!fileId) return
     try {
         const file = await prisma.file.findUnique({
             where: {
-                id: fileID
+                id: fileId
             },
             include: {
+                likes: true,
+                rates: true,
                 inputTypes: true
             }
         });
-        const body: fileType | undefined = insertUrls(file as fileType)
-        return body
+        if (file) {
+            let file1: fileType = file;
+            if (file1.imageKey && check(file1.imageKey)) {
+                const params = {
+                    Bucket,
+                    Key: file1.imageKey
+                }
+                const command = new GetObjectCommand(params);
+                file1.imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+            } if (file1.inputTypes && file1.inputTypes!!) {
+                const inputs = await Promise.all(
+                    file1.inputTypes.map(async (input) => {
+                        if (input.name === "image" && check(input.s3Key as string)) {
+                            const params = {
+                                Bucket,
+                                Key: input.s3Key as string
+                            }
+                            const command = new GetObjectCommand(params);
+                            input.url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+                        }
+                        return input
+                    })
+                );
+                return { ...file1, inputTypes: inputs }
+            }
+            return file1
+        }
     } catch (error) {
-        throw new Error("issues getting file")
+
     } finally {
         await prisma.$disconnect()
     }
 }
 
+
 export async function getUserAccount() {
+
     const session = await getServerSession(authOptions);
     var account: userAccountType = {} as userAccountType;
     if (session) {
@@ -153,94 +230,180 @@ export async function getUserAccount() {
 
 }
 
-export async function getAllFiles() {
-    try {
-        const allFiles = await prisma.file.findMany();
-        const body: fileType[] | undefined = allFiles as fileType[];
-        const retUrlsFiles = retUrlInserts(body);
-        return retUrlsFiles
-    } catch (error) {
-        console.error(new Error("did not return files, check:getAllFiles@serverGets"))
-    } finally {
-        await prisma.$disconnect()
-    }
-}
+export async function getGenFiles(): Promise<fileType[] | undefined> {
 
-export async function getUserFiles() {
-    const account = await getUserAccount();
-    if (!account || !(account && account.data)) return
-    const email: string | undefined = account.data?.email
-    if (!email) return
     try {
-        const user = await prisma.user.findUnique({
-            where: {
-                email: email
-            },
+        const files = await prisma.file.findMany({
             include: {
-                files: true
+                inputTypes: true,
+                likes: true,
+                rates: true
             }
-        });
-        if (user) {
-            const userFiles = await prisma.file.findMany({
-                where: {
-                    userId: user.id
-                },
-                include: {
-                    inputTypes: true,
-                    likes: true,
-                    rates: true
-                }
-            });
-            const retUserFiles = userFiles.map((file) => insertUrls(file as fileType));
-            return retUserFiles
+        })
+        if (files) {
+            const newFiles = await Promise.all(
+                files.map(async (file) => {
+                    if (file.imageKey) {
+                        const params = { Key: file.imageKey, Bucket }
+                        const command = new GetObjectCommand(params);
+                        file.imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 })
+
+                    }
+                    return file
+                }));
+            return newFiles
         }
 
-
     } catch (error) {
-        console.error(new Error("could not get userfiles@serverGets"))
+
     } finally {
         await prisma.$disconnect()
     }
 }
 
-export async function getPosts() {
+
+export async function getPosts(): Promise<postType[] | undefined> {
     try {
-        const posts = await prisma.post.findMany();
-        const insertUrlPosts = posts.map((post, index) => {
-            if (post.s3Key) {
-                return insertUrlPost(post as postType)
-            } else {
-                return post
+        const posts = await prisma.post.findMany({
+            include: {
+                likes: true,
+                rates: true
             }
         });
-        return insertUrlPosts;
+
+        const s3Posts = await Promise.all(
+            posts.map(async (post) => {
+                if (post.s3Key && check(post.s3Key)) {
+                    const params = {
+                        Bucket,
+                        Key: post.s3Key
+                    }
+                    const command = new GetObjectCommand(params);
+                    post.imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+                    return post
+                } else {
+                    return post
+                }
+            })
+        )
+        return s3Posts
     } catch (error) {
-        console.error(new Error(" server issue- no posts"))
+
     } finally {
         await prisma.$disconnect()
     }
 }
-export function checkS3KeyEnd(s3Key: string | undefined) {
-    if (!s3Key) return false
-    const arrEnds = [".png", ".jpeg", ".web"];
-    let check: boolean = arrEnds.find(end => (s3Key.endsWith(end))) ? true : false
-    return check
+
+export async function getUsers(): Promise<userType[] | undefined> {
+    try {
+        const users = await prisma.user.findMany({
+            include: {
+                files: true,
+                posts: true
+            }
+        });
+        if (users) {
+            let tempUsers = users as userType[];
+            await Promise.all(
+                tempUsers.map(async (user) => {
+                    if (user.imgKey && check(user.imgKey)) {
+                        const params = { Key: user.imgKey, Bucket };
+                        const command = new GetObjectCommand(params);
+                        user.image = await getSignedUrl(s3, command, { expiresIn: 3600 });
+                    }
+                    return user
+                })
+            );
+            return tempUsers
+        }
+    } catch (error) {
+
+    } finally {
+        await prisma.$disconnect()
+    }
+}
+export function check(s3Key: string): boolean {
+    const arr: string[] = ["jpeg", "png", "jpg"];
+    let bool: boolean = false;
+    arr.map((end, index) => {
+        if (s3Key.toLowerCase().endsWith(end) || s3Key.toUpperCase().endsWith(end)) {
+            return bool = true
+        }
+    });
+    return bool
 }
 
-
-
-export async function getDetailPost(postId: number) {
+export async function getUserUserName(username: string): Promise<userType | undefined> {
+    if (!username) return
     try {
-        const post = await prisma.post.findUnique({
+        const users = await prisma.user.findMany({
             where: {
-                id: postId
+                name: username
             },
             include: {
-                rates: true,
-                likes: true
-            }
+                files: true,
+                posts: true
+            },
         });
-        return insertUrlPost(post as postType)
+
+        if (users && users[0]) {
+
+            let tempUser: userType = users[0] as userType;
+            if (tempUser.imgKey) {
+                const params = { Key: tempUser.imgKey, Bucket };
+                const command = new GetObjectCommand(params);
+                tempUser.image = await getSignedUrl(s3, command, { expiresIn: 3600 });
+
+            }
+
+            if (tempUser.files && tempUser.files.length!!) {
+                const files = await Promise.all(
+                    tempUser.files.map(async (file) => {
+                        if (file.imageKey && check(file.imageKey)) {
+
+                            const params = { Key: file.imageKey, Bucket };
+                            const command = new GetObjectCommand(params);
+                            file.imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+
+                        } if (file.inputTypes && file.inputTypes.length > 0) {
+                            file.inputTypes.map(async (input) => {
+                                if (input.s3Key && check(input.s3Key) && input.name === "image") {
+
+                                    const params = { Key: input.s3Key, Bucket };
+                                    const command = new GetObjectCommand(params);
+                                    input.url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+
+                                }
+                                return input
+                            })
+                        }
+                        return file
+                    })
+                );
+
+                return { ...tempUser, files: files }
+            }
+            if (tempUser.posts && tempUser.posts && tempUser.posts.length > 0) {
+                const posts = await Promise.all(
+                    tempUser.posts.map(async (post) => {
+                        if (post.s3Key && check(post.s3Key)) {
+
+                            const params = { Key: post.s3Key, Bucket };
+                            const command = new GetObjectCommand(params);
+                            const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+                            return { ...post, imageUrl: url }
+                        } else {
+                            return post
+                        }
+
+                    })
+                );
+
+                return { ...tempUser, posts: posts }
+            }
+
+            return tempUser
+        }
     } catch (error) {
 
     } finally {

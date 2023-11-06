@@ -27,14 +27,17 @@ export default function FileImage() {
     const [tempImg, setTempImg] = React.useState<string | null>(null);
     const [msg, setMsg] = React.useState<mediaType>({ loaded: false, message: "" });
     const [isUploading, setIsUploading] = React.useState<boolean>(false)
-    const randNum = uuidv4().split("-")[0];
+    const [imgFile, setImgFile] = React.useState<File>({} as File)
 
 
 
-    const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
-        if (!e.currentTarget.files) return
+        if (!e.currentTarget.files || !file) return
         const fileImg = e.currentTarget.files[0]
+        const key = await uploadToS3(fileImg, file.name)
+        if (!key) return
+        setFile({ ...file, imageKey: key as string })
         //inserting temp img
         const tempImg_ = URL.createObjectURL(fileImg);
         setTempImg(tempImg_)
@@ -45,13 +48,11 @@ export default function FileImage() {
         setIsUploading(true);
         //THIS GETS PRESIGNED URL FOR UPLOADS then uploads to s3 directly FROM @lib/s3ApiComponents
         if (!file) return
-        const result = await fileUploadToS3(e, file)
 
-        if (result && file) {
-            const body: { key: string, msg: mediaType } = result
-            //KEY-MODIFIED-ADDED FILE EXTENSION TO KEY
-            const prevImageObj: fileType = { ...file, imageKey: body.key }
-            const savedFile = await saveFile(prevImageObj);//saving/getting file.imageUrl
+
+        if (file) {
+
+            const savedFile = await saveFile(file);//saving/getting file.imageUrl
             if (!savedFile) return
             setFile(savedFile);
             //save to storage
@@ -86,7 +87,7 @@ export default function FileImage() {
             </form>
             <div className="container image w-full mx-auto flex flex-col items-center justify-center  z-1000">
                 {
-                    tempImg ?
+                    (tempImg && file && !file.imageUrl) ?
                         <Image src={tempImg}
                             alt={`${file ? file.title : "cover image"}`}
                             width={600}
@@ -108,4 +109,28 @@ export default function FileImage() {
             </div>
         </div>
     )
+}
+
+export async function uploadToS3(file: File, filename: string) {
+    if (!file || !filename) return
+    const formdata = new FormData();
+    const genKey = uuidv4().split("-")[0]
+    const Key = `${file?.name.split(".")[0]}-${genKey}-${filename}-${file.name}`
+    formdata.set("file", file);
+    formdata.set("Key", Key);
+
+
+    try {
+        const res = await fetch("/api/uploadImage", {
+            method: "PUT",
+            body: formdata
+        });
+        if (res.ok) {
+            return Key
+        }
+
+
+    } catch (error) {
+        throw new Error("did not get urlkey")
+    }
 }

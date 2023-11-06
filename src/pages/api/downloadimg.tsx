@@ -20,10 +20,9 @@ export const s3 = new S3Client({
 
 
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
-    console.log(req.headers)
     const Key = req.query.Key as string;
-    // console.log("GetProfilePic", Key)
-    if (!(Key)) res.status(400).json({ message: "missing parameters" })
+    console.log("Key", Key)
+    if (!(Key)) res.status(400).json({ imageUrl: null, key: null })
     try {
         const params = {
             Key,
@@ -41,7 +40,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
             res.status(400).json({ imageUrl: null, key: Key })
         }
     } catch (error) {
-
+        res.status(500).json({ message: "did not return user's url Pic" })
         console.error(new Error("Did not get imageUrl"))
     }
 

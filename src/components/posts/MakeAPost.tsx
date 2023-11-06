@@ -11,24 +11,29 @@ import { InputContext } from '../context/InputTypeProvider';
 
 type mainAccType = {
     getAccount: userAccountType | undefined,
-    getuser: userType | undefined,
-    getuserfiles: fileType[] | undefined
+    getuser: userType | null,
+    getposts: postType[] | undefined,
+
 
 }
-export default function MakeAPost({ getAccount, getuser, getuserfiles }: mainAccType) {
+export default function MakeAPost({ getAccount, getuser, getposts }: mainAccType) {
     const pathname = usePathname();
-    const { setPageHit, setAccount, account, setPosts, posts, setUser, user, setPost, post, setMsg, msg } = React.useContext(GeneralContext);
+    const { setPageHit, setAccount, account, setPosts, posts, setUser, user, setPost, post, setMsg, msg, userPosts, setUserPosts } = React.useContext(GeneralContext);
     const { setUserFiles, userFiles } = React.useContext(InputContext);
-    const [userPosts, setUserPosts] = React.useState<postType[]>([])
 
+
+    React.useEffect(() => {
+        if (!getposts || !getuser) return
+        setPosts(getposts);
+        setUserPosts(getuser.posts);
+        setUserFiles(getuser.files)
+    }, [getposts, getuser, setUserPosts, setPosts, setUserFiles]);
 
     React.useEffect(() => {
         if (!getAccount || !getuser) return
         setAccount(getAccount);
         setUser(getuser);
-        setUserPosts(getuser.posts);
-        setUserFiles(getuser.files)
-    }, [getAccount, setAccount, setUser, getuser, setUserPosts, setUserFiles]);
+    }, [getAccount, setAccount, setUser, getuser]);
 
     React.useEffect(() => {
         if (!pathname || !getAccount || !getAccount.data) return
@@ -50,9 +55,6 @@ export default function MakeAPost({ getAccount, getuser, getuserfiles }: mainAcc
         <div className="lg:container mx-auto px-1 sm:px-0 my-2">
             <div className="flex flex-col items-center justify-center gap-1 py-1 mx-auto w-full ">
                 <PostForm
-                    getAccount={account}
-                    getuser={user}
-                    userFiles={userFiles}
                 />
             </div>
             <div className="flex flex-col items-center justify-center mt-3"><h3 className="text-center text-5xl">Users Posts</h3>

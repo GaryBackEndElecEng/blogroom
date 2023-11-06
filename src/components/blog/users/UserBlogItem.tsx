@@ -62,9 +62,9 @@ export default function UserBlogItem({ file }: mainBlogItemType) {
                         <div className={msgTrue && msgTrue.item1}>{msg.msg}</div>
                     ) : (<div className={msgFalse && msgFalse.item1}>{msg.msg}</div>)}
                 </div>
-                <div className={"leading-6 flex flex-row flex-wrap gap mt-0"}>
-                    <h6 className="font-bold">By:{user && user.name},</h6>
-                    <small className="font-bold">{dateToStr && JSON.stringify(dateToStr)}</small>
+                <div className={"leading-10 flex flex-row flex-wrap gap mt-0 mb-10"}>
+                    <h6 className="font-bold text-slate-200">{user && user.name}, </h6>
+                    <small className="font-bold text-slate-300">{dateToStr && JSON.stringify(dateToStr)}</small>
                 </div>
 
             </div>

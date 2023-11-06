@@ -1,21 +1,30 @@
 "use client"
 import React from 'react'
-import InputTypeProvider from '@context/InputTypeProvider';
-import DashBoard from '../DashBoard';
+import { InputContext } from '@context/InputTypeProvider';
+import DashBoard from './DashBoard';
 import { userAccountType, userType } from '@/lib/Types';
 import Login from "@component/comp/Login";
+import { GeneralContext } from '@/components/context/GeneralContextProvider';
 
 type mainContextType = {
     account: userAccountType | undefined,
-    getuser: userType | undefined
+    getuser: userType | undefined //FILE AND POSTS ARE COMPLETE
 }
 // USER'S DASHBOARD DISPLAYS ALL OF DASHBOARD!!!!!!!!
-export default function InputContextInsert({ account, getuser }: mainContextType) {
+export default function MainDashboard({ account, getuser }: mainContextType) {
+    const { setUserFiles } = React.useContext(InputContext);
+    const { setUserPosts } = React.useContext(GeneralContext);
+
+    React.useEffect(() => {
+        if (!getuser) return
+        setUserFiles(getuser.files);
+        setUserPosts(getuser.posts);
+    }, [setUserFiles, getuser, setUserPosts])
+
     if (account && account.data && getuser) {
+
         return (
-            <InputTypeProvider>
-                <DashBoard account={account} getuser={getuser} />
-            </InputTypeProvider>
+            <DashBoard account={account} getuser={getuser} />
         )
     } else {
         return (

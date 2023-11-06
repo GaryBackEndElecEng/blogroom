@@ -1,17 +1,17 @@
-"use server"
+
 import React from 'react';
-import InputContextInsert from "@/components/blog/dashboard/template/NOTUSEDHERE"
-import { getUserAccount, getUsers } from "@lib/serverGets";
+import MainDashboard from "@/components/blog/dashboard/MainDashboard"
+import { getUserAccount, getUser_ } from "@lib/serverGets";
+import { getEmailUser } from "@lib/fetchTypes";
 
 
 export default async function page() {
     const account = await getUserAccount();
-    const getusers = await getUsers()
-    const getuser = getusers.find((user) => (user.email === account.data?.email as string))
+    const getuser = await getUser_();//ALL FILES AND POSTS COMPLETE
 
     return (
         <React.Fragment>
-            <InputContextInsert account={account} getuser={getuser} />
+            <MainDashboard account={account} getuser={getuser} />
         </React.Fragment>
     )
 

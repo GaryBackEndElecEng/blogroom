@@ -5,13 +5,14 @@ import { v4 as uuidv4 } from "uuid";
 import { InputContext } from "@context/InputTypeProvider";
 import { Button } from "@chakra-ui/react"
 import { saveToStorage } from "@lib/storePullLocStorage";
-import { uploadToS3, } from "@lib/s3ApiComponents";
 import Image from 'next/image';
 import { updateInput } from '@/lib/fetchTypes';
+import { updatefileInput } from '@/lib/generalFunc';
 
 type mediaInputType = {
     imageObj: inputType | null,
-    setImageObj: React.Dispatch<React.SetStateAction<inputType | null>>
+    setImageObj: React.Dispatch<React.SetStateAction<inputType | null>>,
+    show: boolean
 }
 type getUrlType = {
     uploadUrl: string
@@ -20,23 +21,34 @@ type getUrlType = {
 }
 
 
-export default function UploadPreSigned({ imageObj, setImageObj }: mediaInputType) {
+export default function UploadPreSigned({ imageObj, setImageObj, show }: mediaInputType) {
     const { file, setSaved, setFile, setSelect } = React.useContext(InputContext);
     const [tempImg, setTempImg] = React.useState<string | null>(null);
     const [msg, setMsg] = React.useState<mediaType>({ loaded: false, message: "" });
     const [isUploading, setIsUploading] = React.useState<boolean>(false)
     const randNum = uuidv4().split("-")[0];
+    const [imgObjUpdate, setImgObjUpdate] = React.useState<inputType | undefined>()
+
+    React.useEffect(() => {
+        if (imgObjUpdate) {
+            setImageObj(imgObjUpdate)
+        }
+    }, [imgObjUpdate, setImageObj]);
 
 
     const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
         if (!file) return
-        if (!e.currentTarget.files) return
+        if (!e.currentTarget.files || !imageObj) return
         const fileImg = e.currentTarget.files[0]
         //inserting temp img
         const tempImg_ = URL.createObjectURL(fileImg);
         setTempImg(tempImg_)
+        const imgInput = await uploadToS3(fileImg, imageObj);
+        if (!imgInput) return
+        setImageObj(imgInput)
         setSelect(null)
+        setTempImg(null)
         if (!file) return
 
     }
@@ -45,25 +57,16 @@ export default function UploadPreSigned({ imageObj, setImageObj }: mediaInputTyp
         e.preventDefault();
         setIsUploading(true);
         //THIS GETS PRESIGNED URL FOR UPLOADS then uploads to s3 directly FROM @lib/s3ApiComponents
-        if (!file || !imageObj) return
+        if (!file) return
         setIsUploading(true)
-        const result = await uploadToS3(e, imageObj)
 
-        if (result && file) {
-            const body: { key: string, msg: mediaType } = result
-            //KEY EXTENSION CHANGED (ext) ADDING TO imageObj
-            const prevImageObj: inputType = { ...imageObj, s3Key: body.key }
-            // console.log("matchEnd", matchEnd(prevImageObj))
-            // console.log(prevImageObj)
-            setImageObj(prevImageObj)
-            setMsg(body.msg);
-            //adding s3Key to file
-            //GETTING URL;
-            const update_file = await updateInput(prevImageObj)
-            if (update_file) {
-                setFile(update_file)
+        if (file && imgObjUpdate) {
+            const update_input = await updateInput(imgObjUpdate)
+            if (update_input) {
+                const modFile = updatefileInput(file, update_input)
+                setFile(modFile)
                 //save to storage
-                saveToStorage(update_file);
+                saveToStorage(modFile);
                 setTempImg(null)
                 setSaved({ loaded: true, msg: "saved" });
             }
@@ -73,7 +76,8 @@ export default function UploadPreSigned({ imageObj, setImageObj }: mediaInputTyp
         setIsUploading(false);
 
     }
-    // console.log("KEY", imageObj?.s3Key)
+
+
     const msgStyle = "text text-center top-0 inset-0 bg-inherit text-xl";
     const imageStyle = " mx-auto"
     return (
@@ -95,26 +99,53 @@ export default function UploadPreSigned({ imageObj, setImageObj }: mediaInputTyp
                     <Button as={"label"} htmlFor="file" colorScheme="teal" variant="ghost" size="small" className="py-1 border border-blue shadow shadow-blue mt-10 rounded-lg aria-label opacity-0"   >choose file</Button>
                 }
             </form>
-            <div className="container  w-full mx-auto flex flex-col flex-1 items-center justify-center  z-1000">
-                {tempImg
-                    &&
-                    <Image src={tempImg}
-                        alt={`${randNum}-image`}
-                        width={600}
-                        height={400}
-                        className={imageStyle}
-                    />
-                }
-                {(imageObj && imageObj.url && !tempImg) &&
-                    <Image src={imageObj.url}
-                        id={String(imageObj.id)}
-                        alt={`${imageObj.content}-${file && file.name} image`}
-                        width={600}
-                        height={400}
-                        className={imageStyle}
-                    />
-                }
-            </div>
+            {show &&
+                <div className="container  w-full mx-auto flex flex-col flex-1 items-center justify-center  z-1000">
+                    {(tempImg) &&
+                        <Image src={tempImg}
+                            alt={`${randNum}-image`}
+                            width={600}
+                            height={400}
+                            className={imageStyle}
+                        />
+                    }
+                    {(imageObj && imageObj.url) &&
+                        <>
+                            <Image src={imageObj.url as string}
+                                id={String(imageObj.id)}
+                                alt={`${imageObj.content}-${file && file.name} image`}
+                                width={600}
+                                height={400}
+                                className={imageStyle}
+                            />
+                        </>
+                    }
+                </div>
+            }
         </div>
     )
+}
+
+export async function uploadToS3(imgFile: File, imageObj: inputType): Promise<inputType | undefined> {
+    const formdata = new FormData();
+    if (!imgFile) return undefined
+    const ext = imgFile.type.split("/")[1]
+    const genKey = uuidv4().split("-")[0]
+    const Key = `${imgFile?.name.split(".")[0]}-${genKey}-${imageObj.s3Key}.${ext}`
+    formdata.set("file", imgFile);
+    formdata.set("Key", Key);
+
+
+    try {
+        const res = await fetch("/api/uploadImage", {
+            method: "PUT",
+            body: formdata
+        });
+        if (res.ok) {
+            return { ...imageObj, s3Key: Key }
+        }
+
+    } catch (error) {
+        throw new Error("did not get urlkey")
+    }
 }

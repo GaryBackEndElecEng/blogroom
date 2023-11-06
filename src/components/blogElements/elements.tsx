@@ -158,11 +158,11 @@ export const type_ = (name: string) => {
 export function ImageJsx({ input }: mainHeader) {
     if (input && input.url && input.s3Key) {
         return (
-            <>
+            <div className="lg:prose lg:prose-xl mx-auto ">
                 {input.url &&
-                    <Image src={input.url} alt={input.content} width={800} height={800} className="aspect-video rounded-lg p-2 w-full my-3 mb-4" />
+                    <Image src={input.url} alt={input.content} width={900} height={600} className="aspect-video rounded-lg p-2 w-full my-3 mb-4" />
                 }
-            </>
+            </div>
         )
     }
 }

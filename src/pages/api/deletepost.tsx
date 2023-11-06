@@ -1,6 +1,5 @@
 import prisma from "@_prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
-import { insertUrlPost } from "@lib/s3ApiComponents"
 import { postType } from "@/lib/Types";
 
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
@@ -20,7 +19,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
                 }
             });
             if (post) {
-                res.status(200).json(post)
+                res.status(200).json(post as postType)
                 await prisma.$disconnect()
             }
         }

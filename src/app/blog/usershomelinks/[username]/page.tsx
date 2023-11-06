@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { getUsers } from "@lib/serverGets";
+import { getUserUserName } from "@lib/serverGets";
 // import { getUsers } from "@lib/fetchTypes";
 import UserNameBlogs from "@/components/blog/users/UserNameBlogs";
 import type { Metadata, ResolvingMetadata } from 'next';
@@ -11,12 +11,10 @@ const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site
 
 export default async function userNames({ params }: { params: { username: string } }) {
     const { username } = params;
-    const get_users = await getUsers();
-    let get_user: userType | undefined;
-    if (get_users) {
-        const decodename = username.replace("-", " ");
-        get_user = get_users.find(user => (user.name === decodename))
-    }
+    const decodename = username.replace("-", " ");
+    //FILES AND POSTS ARE COMPLETE AND USER OWNED
+    let get_user: userType | undefined = await getUserUserName(decodename);
+    console.log(decodename)
 
 
     if (get_user) {

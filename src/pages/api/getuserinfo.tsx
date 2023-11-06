@@ -2,15 +2,23 @@ import React from 'react';
 import prisma from "@_prisma/client";
 import { NextApiRequest, NextApiResponse } from 'next';
 import { userType } from '@/lib/Types';
-import S3 from "aws-sdk/clients/s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import "@aws-sdk/signature-v4-crt";
 
-const s3 = new S3({
-    apiVersion: "2006-03-01",
-    accessKeyId: process.env.SDK_ACCESS_KEY,
-    secretAccessKey: process.env.SDK_ACCESS_SECRET,
-    region: process.env.BUCKET_REGION,
-    signatureVersion: "v4"
-})
+const Bucket = process.env.BUCKET_NAME as string
+const region = process.env.BUCKET_REGION as string
+const accessKeyId = process.env.SDK_ACCESS_KEY as string
+const secretAccessKey = process.env.SDK_ACCESS_SECRET as string
+
+export const s3 = new S3Client({
+    region,
+    credentials: {
+        accessKeyId,
+        secretAccessKey
+    }
+
+});
 
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
 
@@ -31,8 +39,8 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
                     }
                 });
                 if (user) {
-                    const addUserProfile = upsertImageUrl(user as userType)
-                    res.status(200).json(addUserProfile);
+                    const insertUser = await insertImgUser(user as userType)
+                    res.status(200).json(insertUser);
                 } else {
                     res.status(400).json({ message: " user not found" })
                 }
@@ -44,30 +52,18 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
         }
     }
 }
-const matchEnd = (s3Key: string) => {
-    let arr: string[] = [".png", ".jpeg", ".Web", "PNG", "JPEG"]
-    let check: boolean = false;
-    arr.forEach((end, index) => {
-        if (s3Key?.endsWith(end)) {
-            return check = true
-        }
-    });
-    return check
-}
+export async function insertImgUser(user: userType) {
 
-function upsertImageUrl(user: userType) {
-    if (user.imgKey && matchEnd(user.imgKey)) {
-        const s3Params = {
-            Bucket: process.env.BUCKET_NAME as string,
-            Key: user.imgKey,
-        };
-
-        user.image = s3.getSignedUrl(
-            "getObject", s3Params
-        );
-
-        return user
-    } else {
-        return user
+    if (!user.imgKey) return user;
+    const params = {
+        Key: user.imgKey,
+        Bucket
     }
+    const command = new GetObjectCommand(params);
+    const userimage = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    user.image = userimage ? userimage : undefined;
+    return user
 }
+
+
+

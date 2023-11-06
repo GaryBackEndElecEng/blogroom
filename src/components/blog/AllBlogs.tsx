@@ -27,10 +27,11 @@ type slugType = [
 
 type UserBlogType = {
     get_users: userType[] | undefined,
+    getfiles: fileType[] | [],
 }
 
 
-export default function AllBlogs({ get_users }: UserBlogType) {
+export default function AllBlogs({ get_users, getfiles }: UserBlogType) {
     const { allFiles, setAllFiles } = React.useContext(InputContext);
     const { setPageHit, setUsers, users } = React.useContext(GeneralContext);
     const [msg, setMsg] = React.useState<msgType>({} as msgType);
@@ -55,18 +56,8 @@ export default function AllBlogs({ get_users }: UserBlogType) {
     }, [setPageHit]);
 
     React.useMemo(async () => {
-        async function getFiles() {
-            const allBlogs: fileType[] | undefined = await getAllFiles();
-            if (allBlogs) {
-                setMsg({ loaded: true, msg: "recieved" });
-                setTempFiles(allBlogs)
-                return setAllFiles(allBlogs);
-            } else {
-                setMsg({ loaded: false, msg: "no blogs" });
-            };
-        }
-        await getFiles()
-    }, []);
+        setAllFiles(getfiles);
+    }, [getfiles, setAllFiles]);
 
     const container = "allBlog_container mx-auto lg:container flex flex-col p-2 mt-5 gap-3  w-full items-center relative"
     const linkContainer = "allBlog_subContainer flex flex-col gap-1 p-1 justify-start items-center w-full grid-cols-1 sm:grid sm:grid-cols-2 sm:place-items-center sm:gap-2 overflow-hidden "

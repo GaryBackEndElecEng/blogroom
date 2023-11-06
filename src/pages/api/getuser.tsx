@@ -1,18 +1,23 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import type { mediaType, inputType, fileType } from "@/lib/Types";
-import S3 from "aws-sdk/clients/s3";
+import type { userType } from "@/lib/Types";
 import prisma from "@_prisma/client";
-import { getProfilePic } from "@lib/s3ApiComponents";
+import "@aws-sdk/signature-v4-crt"
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+const Bucket = process.env.BUCKET_NAME as string
+const region = process.env.BUCKET_REGION as string
+const accessKeyId = process.env.SDK_ACCESS_KEY as string
+const secretAccessKey = process.env.SDK_ACCESS_SECRET as string
 
-const s3 = new S3({
-    apiVersion: "2006-03-01",
-    accessKeyId: process.env.SDK_ACCESS_KEY,
-    secretAccessKey: process.env.SDK_ACCESS_SECRET,
-    region: process.env.BUCKET_REGION,
-    signatureVersion: "v4"
-})
-// This returns all files from the DB and doesnot include inputTypes
+export const s3 = new S3Client({
+    region,
+    credentials: {
+        accessKeyId,
+        secretAccessKey
+    }
+
+});
 
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
     const userId = req.query.userId
@@ -21,26 +26,35 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
             where: {
                 id: userId as string
             },
-            include: {
-                files: true,
-                posts: true
-            }
+
         });
         if (user) {
             if (user.imgKey) {
-                let tempUrl = getProfilePic(user.imgKey);
-                const userInsertImg = { ...user, image: tempUrl }
+                const userInsertImg = await insertImgUser(user as userType)
                 res.status(200).json(userInsertImg)
             } else {
                 res.status(200).json(user)
             }
             await prisma.$disconnect();
         } else {
-            res.status(404).json({ message: "no user found" })
+            res.status(404).json({ message: "no user found@getuser" })
         }
     } catch (error) {
-        throw new Error("server error from api/getallFiles()")
+        throw new Error("server error from api/getuser()")
     } finally {
         await prisma.$disconnect();
     }
+}
+
+export async function insertImgUser(user: userType) {
+
+    if (!user.imgKey) return user
+    const params = {
+        Key: user.imgKey,
+        Bucket
+    }
+    const command = new GetObjectCommand(params);
+    const imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 })
+    user.image = imageUrl ? imageUrl : undefined;
+    return user
 }

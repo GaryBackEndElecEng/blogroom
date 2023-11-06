@@ -1,7 +1,16 @@
-import type { paramsType, fetchFilesType, fileType, fetchAllType, fetchSingleFileType, inputType, userType, contactType, mainPageHit, navImageLinkType, linkType, postType, likefileType, likepostType, ratefileType, ratepostType } from "@lib/Types";
+import type { paramsType, fetchFilesType, fileType, fetchAllType, fetchSingleFileType, inputType, userType, contactType, mainPageHit, s3mediaType, linkType, postType, likefileType, likepostType, ratefileType, ratepostType } from "@lib/Types";
+const csrf = process.env.NEXTAUTH_CSRF as string;
+const local = process.env.NEXT_PUBLIC_local as string;
+const public_ = process.env.NEXT_PUBLIC_site as string;
+
+axios.defaults.baseURL = (process.env.NODE_ENV === "production") ? public_ : local;
+axios.defaults.headers.common['Authorization'] = csrf;
+axios.defaults.headers.post['Content-Type'] = 'application/json';
+axios.defaults.headers.put['Content-Type'] = 'application/x-www-form-urlencoded ,multipart/form-data';
+axios.defaults.headers.get['Content-Type'] = 'application/json';
 import axios from "axios";
 
-export const config = { runtime: 'experimental-edge' }
+// export const config = { runtime: 'experimental-edge' }
 
 //GET ALL USER'S FILE OR RETURNS A SINGLE FILE LENGTH=1
 export async function getuserFiles(userID: string) {
@@ -47,6 +56,51 @@ export async function addInput(input: inputType) {
         console.error(new Error(" input from api addinput was not added"))
     }
 }
+export async function getMediaInput(input: inputType) {
+    if (!input) return
+    try {
+        const { data } = await axios.get(`/api/getmediainput?inputID=${input.id}&Key=${input.s3Key}`);
+        const body: inputType = await data;
+        return body
+    } catch (error) {
+
+    }
+}
+export async function getMedia(Key: string): Promise<s3mediaType | undefined> {
+    if (!Key) return
+    try {
+        const { data } = await axios.get(`/api/media?Key=${Key}`)
+        const body: s3mediaType = data;
+        return body
+    } catch (error) {
+
+    }
+
+}
+export async function getS3User(user: userType) {
+    if (!(user)) return
+    try {
+        //api/media has req.query.fileType/& Key
+        const { data } = await axios.get(`/api/getuser?userId=${user.id}`);
+        const body: userType = data;
+        return body
+
+    } catch (error) {
+        console.error(new Error("did not get user's image S3 URL"))
+    }
+}
+export async function getEmailUser(email: string) {
+    if (!(email)) return
+    try {
+        //api/media has req.query.fileType/& Key
+        const { data } = await axios.get(`/api/getemailuser?email=${email}`);
+        const body: userType = data;
+        return body
+
+    } catch (error) {
+        console.error(new Error("did not get user's image S3 URL"))
+    }
+}
 
 export async function getUsers() {
 
@@ -80,9 +134,9 @@ export async function updateInput(input: inputType | null) {
     if (!input) { return }
     try {
         const { data } = await axios.post("/api/updateinput", input);
-        const recNewFile: fileType = await data;
+        const newInput: inputType = await data;
         // console.log(recNewFile)
-        return recNewFile
+        return newInput
     } catch (error) {
         console.error(new Error(" input from api addinput was not added"))
     }
@@ -102,8 +156,8 @@ export async function updateInputOnly(input: inputType | null) {
 export async function getFile(fileID: string) {
 
     try {
-        const { data } = await axios.get(`/api/getfile?fileID=${fileID}`);
-        const body: fileType = await data;
+        const res = await fetch(`/api/getfile?fileID=${fileID}`);
+        const body: fileType = await res.json();
         console.log(body)
         return body
     } catch (error) {
@@ -277,6 +331,16 @@ export async function sendPost(post: postType) {
     if (!post) return
     try {
         const { data } = await axios.post(`/api/sendpost`, post);
+        const body: postType = await data as postType;
+        return body
+    } catch (error) {
+        console.error(new Error("did not put post from getpost"))
+    }
+}
+export async function postDetail(post: postType) {
+    if (!post) return
+    try {
+        const { data } = await axios.get(`/api/postdetail?postId=${post.id}`);
         const body: postType = await data as postType;
         return body
     } catch (error) {

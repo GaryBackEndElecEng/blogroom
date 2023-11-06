@@ -1,9 +1,9 @@
 "use client";
 import React from 'react'
-import { fileType, postType, userAccountType, userType } from '@/lib/Types';
+import { fileType, postType, gets3ProfilePicType, userType } from '@/lib/Types';
 import { GeneralContext } from '../context/GeneralContextProvider';
 import { usePathname } from "next/navigation";
-import { imgPostUploadToS3 } from '@/lib/s3ApiComponents';
+import { v4 as uuidv4 } from "uuid";
 import { sendPost } from '@/lib/fetchTypes';
 import { FormControl, FormLabel, TextField } from '@mui/material';
 import { InputContext } from '../context/InputTypeProvider';
@@ -13,56 +13,50 @@ type fileUrlType = {
     url: string
 }
 type mainAccType = {
-    getAccount: userAccountType | null,
-    getuser: userType | null,
-    userFiles: fileType[]
+
 }
-export default function PostForm({ getAccount, getuser, userFiles }: mainAccType) {
+export default function PostForm() {
     const pathname = usePathname();
-    const { setPageHit, setAccount, account, setPosts, posts, setUser, user, setPost, post, setMsg, msg, setUserPosts, userPosts } = React.useContext(GeneralContext);
-    const { setUserFiles } = React.useContext(InputContext);
+    const { setPageHit, account, setPosts, posts, setUser, setPost, post, setMsg, msg, setUserPosts, userPosts, user } = React.useContext(GeneralContext);
+    const { setUserFiles, userFiles } = React.useContext(InputContext);
     const [imgFile, setImgFile] = React.useState<File>({} as File);
     const [imgTemp, setImgTemp] = React.useState<File>({} as File);
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [fileUrls, setFileUrls] = React.useState<fileUrlType[] | null>(null);
 
     React.useEffect(() => {
-        if (getuser) {
+        if (userFiles) {
             let arr: fileUrlType[] = [{ name: "select a file", url: "none" }]
-            getuser.files.forEach((file, index) => {
+            userFiles.forEach((file, index) => {
                 arr.push({ name: file.name, url: file.fileUrl })
             });
             setFileUrls(arr)
         }
-    }, [setFileUrls, getuser]);
+    }, [setFileUrls, userFiles]);
+
 
     React.useEffect(() => {
-        if (!getAccount || !getuser) return
-        setAccount(getAccount);
-        setUser(getuser);
-        setUserPosts(getuser.posts)
-        setUserFiles(getuser.files)
-    }, [getAccount, setAccount, setUser, getuser, setUserPosts, setUserFiles]);
+        if (!pathname || !account || !account.data) return
+        setPageHit({ page: pathname, name: account?.data?.name });
+    }, [pathname, setPageHit, account]);
 
-    React.useEffect(() => {
-        if (!pathname || !getAccount || !getAccount.data) return
-        setPageHit({ page: pathname, name: getAccount?.data?.name });
-    }, [pathname, setPageHit, getAccount]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!user) return
         setIsLoading(true);
-        const data = await imgPostUploadToS3(e, user);
+        const body: string | undefined = await imgPostUploadToS3(imgFile, user);
+        if (!body) { return setMsg({ loaded: false, msg: "key was not saved" }) }
         setIsLoading(false);
-        if (!data) { return setMsg({ loaded: false, msg: "image was not saved" }) }
+        const key = body;
+        const temp: postType = { ...post, s3Key: key, userId: user.id, imageUrl: null };
+        const savedPost = await sendPost(temp);
+        if (!savedPost) { return setMsg({ loaded: false, msg: "rec was not returned" }) }
+        setPost(savedPost);
+        setPosts([...posts, savedPost]);
+        setUserPosts([...userPosts, savedPost]);
+        if (!savedPost) { return setMsg({ loaded: false, msg: "post not saved" }) }
         setMsg({ loaded: true, msg: "saved" })
-        const { key } = data;
-        const temp: postType = { ...post, s3Key: key, userId: user.id };
-        setPost(temp);
-        const recPost = await sendPost(temp);
-        if (recPost) { setPosts([...posts, recPost]); setMsg({ loaded: true, msg: "saved" }); setUserPosts([...userPosts, recPost]) }
-        else { setPosts([...posts, temp]); setMsg({ loaded: false, msg: "post was not saved" }) };
 
         setImgFile({} as File)
         setPost({} as postType)
@@ -162,4 +156,36 @@ export default function PostForm({ getAccount, getuser, userFiles }: mainAccType
             </form>
         </div>
     )
+}
+
+export async function imgPostUploadToS3(file: File, user: userType): Promise<string | undefined> {
+
+    if (!user! || !user.name) return
+
+    const formdata = new FormData();
+    if (!file) return
+    const encodeUsername = user.name.replace(" ", "-")
+    const genKey = `${user.id}-${encodeUsername}/${uuidv4().split("-")[0]}-${file.name}`
+    const key = genKey
+    const Key = `${genKey}`;
+    formdata.set("file", file);
+    formdata.set("Key", Key);
+
+    try {
+        const controller = new AbortController();
+        const id = setTimeout(() => { controller.abort() }, 5000)
+        const options = {
+            method: "PUT",
+            body: formdata,
+            signal: controller.signal
+        }
+        const response = await fetch(`/api/uploadImage`, options);
+        if (response.ok) {
+            clearInterval(id);
+            return Key
+        }
+
+    } catch (error) {
+
+    }
 }

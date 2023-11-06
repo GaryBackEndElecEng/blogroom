@@ -38,11 +38,12 @@ export default function DashBoard({ account, getuser }: mainContextType) {
 
     React.useMemo(async () => {
         if (!(account && account.data)) return
+
         //BELOW RETURNS ALL inputtypes, && likes and rates)
-        const userfiles: fileType[] | undefined = await user_files(account.data.email);
-        if (userfiles && userfiles.length!!) {
-            setUserFiles(userfiles);
-            setCols(userfiles.length);
+        const userfiles_: fileType[] | undefined = await user_files(account.data.email);
+        if (userfiles_ && userfiles_.length!!) {
+            setUserFiles(userfiles_);
+            setCols(userfiles_.length);
 
         }
     }, [setUserFiles, account]);

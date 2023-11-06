@@ -1,21 +1,22 @@
-"use server"
+
 import React from 'react'
 import MakeAPost from "@component/posts/MakeAPost";
-import { getAccount, getUser } from '@/lib/nextAuth';
-import { getUserFiles } from "@lib/serverGets";
+import { getAccount } from '@/lib/nextAuth';
+import { getUser_, getPosts } from "@lib/serverGets";
 import Login from "@component/comp/Login";
+import { userType } from '@/lib/Types';
 
 export default async function page() {
     const getaccount = await getAccount();
-    const getuser = await getUser();
-    const getuserfiles = await getUserFiles();
     if (getaccount && getaccount.data?.status === "authenticated") {
+        const getuser = await getUser_() ? await getUser_() as userType : null;
+        const getposts = await getPosts();
         return (
             <div>
                 <MakeAPost
                     getAccount={getaccount}
                     getuser={getuser}
-                    getuserfiles={getuserfiles}
+                    getposts={getposts}
                 />
             </div>
         )

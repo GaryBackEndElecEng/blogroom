@@ -10,7 +10,7 @@ type mainType = {
 
 }
 const DeletePopUp2 = ({ popup, setPopup, input }: mainType) => {
-    const { file, setFile, setMsg } = React.useContext(InputContext);
+    const { file, setFile, setMsg, setSelect } = React.useContext(InputContext);
 
     const handleDelete = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
@@ -19,7 +19,7 @@ const DeletePopUp2 = ({ popup, setPopup, input }: mainType) => {
         if (!retFile) return;
         setFile(retFile)
         setMsg({ loaded: true, msg: `${input.name} has been deleted` });
-        // console.log(deleteUnit)
+        setSelect(null)
         setPopup(false);
         return setTimeout(() => { setMsg({ loaded: false, msg: "" }); }, 2500);
 

@@ -13,7 +13,6 @@ export default function HomeLinksHeader() {
     const [show, setShow] = React.useState<boolean>(false);
     const [showUserPg, setShowUserPg] = React.useState<boolean>(false);
     const [username, setUsername] = React.useState<string | null>(null);
-    const userImage = (client && client.image) ? client.image : url;
 
     const [turnOn, setTurnOn] = React.useState<boolean>(false);
     React.useEffect(() => {
@@ -51,9 +50,15 @@ export default function HomeLinksHeader() {
                 <div className={container}>
                     <section className={sectionStyle}>
                         <div className={styles.ImgContainerDash}>
-                            <Image src={userImage} width={75} height={75} alt="www.garymasterconnect.com"
-                                className={`${styles.dashImg} bg-slate-900 rounded-full p-2 border border-white `}
-                            />
+                            {client && client.image ?
+                                <Image src={client.image} width={75} height={75} alt="www.garymasterconnect.com"
+                                    className={`${styles.dashImg} bg-slate-900 rounded-full p-2 border border-white `}
+                                />
+                                :
+                                <Image src={url} width={75} height={75} alt="www.garymasterconnect.com"
+                                    className={`${styles.dashImg} bg-slate-900 rounded-full p-2 border border-white `}
+                                />
+                            }
                         </div>
 
                     </section>

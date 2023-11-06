@@ -2,15 +2,15 @@
 import React from 'react';
 import { fileType, userType } from '@/lib/Types';
 import UserBlogItem from "@/components/blog/users/UserBlogItem";
-import { getFile, } from "@lib/serverGets";
+import { getFileDetail } from "@lib/serverGets";
 import { Metadata, ResolvingMetadata } from 'next';
 
 const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site : process.env.NEXT_PUBLIC_local
 
 export default async function filenamePage({ params }: { params: { fileID: string } }) {
 
-    const file = await getFile(params.fileID as string)
-    if (!file) return
+    const file = await getFileDetail(params.fileID as string)
+    // console.log("FILES", file, params)
 
     return (
         <div>

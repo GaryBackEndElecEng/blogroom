@@ -1,18 +1,23 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import prisma from "@_prisma/client";
 import type { fileType, inputType } from "@lib/Types";
-import S3 from "aws-sdk/clients/s3";
-import { insertUrls } from "@lib/s3ApiComponents"
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import "@aws-sdk/signature-v4-crt";
 
+const Bucket = process.env.BUCKET_NAME as string
+const region = process.env.BUCKET_REGION as string
+const accessKeyId = process.env.SDK_ACCESS_KEY as string
+const secretAccessKey = process.env.SDK_ACCESS_SECRET as string
 
-const s3 = new S3({
-    apiVersion: "2006-03-01",
-    accessKeyId: process.env.SDK_ACCESS_KEY,
-    secretAccessKey: process.env.SDK_ACCESS_SECRET,
-    region: process.env.BUCKET_REGION,
-    signatureVersion: "v4"
-})
+export const s3 = new S3Client({
+    region,
+    credentials: {
+        accessKeyId,
+        secretAccessKey
+    }
 
+});
 
 export default async function handleFile(req: NextApiRequest, res: NextApiResponse<any>) {
     const input = req.body as inputType;
@@ -39,7 +44,7 @@ export default async function handleFile(req: NextApiRequest, res: NextApiRespon
             });
             // console.log(addInput.id, "recieved", input.id)
             if (addInput) {
-                const addUrl = upsertImageUrl(addInput)
+                const addUrl = insertInputUrl(addInput)
                 res.status(200).json(addUrl)
             } else {
                 res.status(400).json({ message: "did not save/update @ addinput" })
@@ -55,31 +60,16 @@ export default async function handleFile(req: NextApiRequest, res: NextApiRespon
     await prisma.$disconnect()
 
 }
-const matchEnd = (input: inputType) => {
-    let arr: string[] = [".png", ".jpeg", ".Web", "PNG", "JPEG"]
-    let check: boolean = false;
-    arr.forEach((end, index) => {
-        if (input.s3Key?.endsWith(end)) {
-            return check = true
-        }
-    });
-    return check
+
+export async function insertInputUrl(input: inputType) {
+    if (input.name !== "image" && !input.s3Key) return input;
+    const s3Params = {
+        Bucket: process.env.BUCKET_NAME as string,
+        Key: input.s3Key as string,
+    };
+    const command = new GetObjectCommand(s3Params);
+    input.url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    return input
 }
 
-function upsertImageUrl(input: inputType) {
-    if (input.name === "image" && input.s3Key && matchEnd(input)) {
-        const s3Params = {
-            Bucket: process.env.AWS_BUCKET_NAME as string,
-            Key: input.s3Key,
-        };
-
-        input.url = s3.getSignedUrl(
-            "getObject", s3Params
-        );
-
-        return input
-    } else {
-        return input
-    }
-}
 

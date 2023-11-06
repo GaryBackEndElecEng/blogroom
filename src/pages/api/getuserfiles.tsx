@@ -1,16 +1,24 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import type { mediaType, inputType, fileType, userType } from "@/lib/Types";
+import type { fileType, inputType, userType } from "@/lib/Types";
 import prisma from "@_prisma/client";
-import S3 from "aws-sdk/clients/s3";
-import { insertUrls } from "@lib/s3ApiComponents";
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import "@aws-sdk/signature-v4-crt";
 
-const s3 = new S3({
-    apiVersion: "2006-03-01",
-    accessKeyId: process.env.SDK_ACCESS_KEY,
-    secretAccessKey: process.env.SDK_ACCESS_SECRET,
-    region: process.env.BUCKET_REGION,
-    signatureVersion: "v4"
-})
+const Bucket = process.env.BUCKET_NAME as string
+const region = process.env.BUCKET_REGION as string
+const accessKeyId = process.env.SDK_ACCESS_KEY as string
+const secretAccessKey = process.env.SDK_ACCESS_SECRET as string
+
+export const s3 = new S3Client({
+    region,
+    credentials: {
+        accessKeyId,
+        secretAccessKey
+    }
+
+});
+
 
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
     const userID = req.query.userID as string
@@ -32,14 +40,9 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
                 }
             });
             if (files && files.length > 0) {
-                let arr: fileType[] = files as unknown[] as fileType[]
-                let arr2 = arr as fileType[]
-                const retFiles = arr2.map(file => insertUrls(file));
-                if (!retFiles) {
-                    res.status(200).json(arr);
-                    return
-                }
-                res.status(200).json(retFiles);
+                let arr: fileType[] = await insertFilesUrls(files)
+
+                res.status(200).json(arr);
                 await prisma.$disconnect()
 
 
@@ -90,35 +93,53 @@ export function genFileUrl(user: userType, file: fileType) {
     }
 }
 
-// export function insertUrls(file: fileType) {
+export async function insertFilesUrls(files: fileType[]) {
+    const fileArr: fileType[] = await Promise.all(
+        files.map(async (file: fileType) => {
+            return await insertFileUrls(file)
+        })
+    )
+    return fileArr
+}
 
-//     if (file) {
-//         let tempFile: fileType = file;
-//         if (tempFile.imageKey) {
-//             const s3Params = {
-//                 Bucket: process.env.AWS_BUCKET_NAME as string,
-//                 Key: file.imageKey,
-//             };
-//             const imageUrl = s3.getSignedUrl(
-//                 "getObject", s3Params
-//             );
-//             tempFile.imageUrl = imageUrl;
-//         };
-//         tempFile.inputTypes.map((inputType => {
-//             if (inputType.s3Key && inputType.name === "image") {
-//                 const s3Params = {
-//                     Bucket: process.env.AWS_BUCKET_NAME as string,
-//                     Key: inputType.s3Key,
-//                 };
-//                 const imageUrl = s3.getSignedUrl(
-//                     "getObject", s3Params
-//                 );
-//                 inputType.url = imageUrl;
-//             }
-//             return inputType
-//         }));
-//         return tempFile;
-//     };
+export async function insertFileUrls(file: fileType) {
+    // if (!file) return
+    let tempFile: fileType = file;
+    if (!tempFile.imageKey) return tempFile
+    const s3Params = {
+        Bucket,
+        Key: tempFile.imageKey,
+    };
+    // const imageUrl = s3.getSignedUrl(
+    //     "getObject", s3Params
+    // );
+    const command = new GetObjectCommand(s3Params)
+    tempFile.imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    if (!tempFile.inputTypes || !(tempFile.inputTypes?.length > 0)) return tempFile
+    let inputs = tempFile.inputTypes;
+    let Arr: inputType[] = [];
+    Arr = await insertInputsUrl(inputs as inputType[]);
+    tempFile = { ...tempFile, inputTypes: Arr }
+    return tempFile
+}
+export async function insertInputsUrl(inputs: inputType[]) {
+    const arr: inputType[] = await Promise.all(
+        inputs.map(async (input) => {
+            return await insertInputUrl(input)
+        })
+    )
+    return arr
+}
+
+export async function insertInputUrl(input: inputType) {
+    if (input.name !== "image" && !input.s3Key) return input;
+    const s3Params = {
+        Bucket: process.env.BUCKET_NAME as string,
+        Key: input.s3Key as string,
+    };
+    const command = new GetObjectCommand(s3Params);
+    input.url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    return input
+}
 
 
-// }

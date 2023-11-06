@@ -1,16 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import type { mediaType, inputType, fileType, postType } from "@/lib/Types";
 import prisma from "@_prisma/client";
-import S3 from "aws-sdk/clients/s3";
-import { insertUrlPost } from "@/lib/s3ApiComponents";
+import { insertUrlPosts } from "@/lib/s3ApiComponents";
+import "@aws-sdk/signature-v4-crt"
 
-const s3 = new S3({
-    apiVersion: "2006-03-01",
-    accessKeyId: process.env.SDK_ACCESS_KEY,
-    secretAccessKey: process.env.SDK_ACCESS_SECRET,
-    region: process.env.BUCKET_REGION,
-    signatureVersion: "v4"
-})
 
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
     const userID = req.query.userID as string
@@ -32,9 +25,9 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
                 }
             });
             if (posts && posts.length > 0) {
-                let arr: postType[] = posts as postType[]
-                const retFiles = arr.map(post => insertUrlPost(post));
-                res.status(200).json(retFiles);
+
+                const retPosts: postType[] | undefined = await insertUrlPosts(posts);
+                res.status(200).json(retPosts);
             } else {
                 res.status(404).json({ message: "no posts from getuserposts" });
                 await prisma.$disconnect()
@@ -49,35 +42,4 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
         await prisma.$disconnect()
     }
 }
-export function insertUrls(file: fileType) {
 
-    if (file) {
-        let tempFile: fileType = file;
-        if (tempFile.imageKey) {
-            const s3Params = {
-                Bucket: process.env.BUCKET_NAME as string,
-                Key: file.imageKey,
-            };
-            const imageUrl = s3.getSignedUrl(
-                "getObject", s3Params
-            );
-            tempFile.imageUrl = imageUrl;
-        };
-        tempFile.inputTypes.map((inputType => {
-            if (inputType.s3Key && inputType.name === "image") {
-                const s3Params = {
-                    Bucket: process.env.BUCKET_NAME as string,
-                    Key: inputType.s3Key,
-                };
-                const imageUrl = s3.getSignedUrl(
-                    "getObject", s3Params
-                );
-                inputType.url = imageUrl;
-            }
-            return inputType
-        }));
-        return tempFile;
-    };
-
-
-}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { fileType, gets3ImageType, linkType, postType, userType } from "@lib/Types";
 import { inputType, inputArr } from "./Types";
-import { gets3Image } from "./s3ApiComponents";
+// import { gets3Image } from "./s3ApiComponents";
 import { v4 as uuidv4 } from 'uuid';
 import { addInput, deleteInput, } from "@lib/fetchTypes";
 import axios from 'axios';
@@ -27,7 +27,11 @@ export function updateFile(file: fileType, input: inputType | null) {
 
     return retFile
 }
-
+export function updatefileInput(file: fileType, input: inputType) {
+    const reduceInps = file.inputTypes.filter(input_ => (input_.id !== input.id));
+    const fillInputs: inputType[] = [...reduceInps, input]
+    return { ...file, inputTypes: fillInputs as inputType[] }
+}
 
 
 
@@ -176,34 +180,34 @@ export function insertInput(file: fileType, input: inputType, prop: { key: strin
 
 //s3Keys are unique=> match s3Keys=> insert Url into image
 
-export async function inputInsertUrl(key: string | null, fileType: string | undefined, file: fileType, input: inputType) {
-    const check = (input.name === "image" && key && fileType) ? true : false;
-    let getUrl: string | undefined;
-    let getS3Key: string | undefined;
-    let getImageObj: inputType | undefined;
-    if (check && key && fileType && input.s3Key) {
-        const data: gets3ImageType | undefined = await gets3Image(input.s3Key, input.type, file.id);
-        if (!data) return
-        const { imageUrl, key, imageObj, msg } = data
-        getUrl = imageUrl;
-        getS3Key = key;
-        getImageObj = imageObj
-    }
-    let tempFile = file;
-    if (!getImageObj) return
-    const removed_inputTypeArr = tempFile.inputTypes.filter(inputType => (inputType.id !== input.id));
+// export async function inputInsertUrl(key: string | null, fileType: string | undefined, file: fileType, input: inputType) {
+//     const check = (input.name === "image" && key && fileType) ? true : false;
+//     let getUrl: string | undefined;
+//     let getS3Key: string | undefined;
+//     let getImageObj: inputType | undefined;
+//     if (check && key && fileType && input.s3Key) {
+//         const data: gets3ImageType | undefined = await gets3Image(input.s3Key, input.type, file.id);
+//         if (!data) return
+//         const { imageUrl, key, imageObj, msg } = data
+//         getUrl = imageUrl;
+//         getS3Key = key;
+//         getImageObj = imageObj
+//     }
+//     let tempFile = file;
+//     if (!getImageObj) return
+//     const removed_inputTypeArr = tempFile.inputTypes.filter(inputType => (inputType.id !== input.id));
 
-    const addNewFile = { ...tempFile, inputTypes: [...removed_inputTypeArr, getImageObj] }
-    return { newFile: addNewFile, imageObj: getImageObj }
+//     const addNewFile = { ...tempFile, inputTypes: [...removed_inputTypeArr, getImageObj] }
+//     return { newFile: addNewFile, imageObj: getImageObj }
 
-}
+// }
 
 export async function removeComponent(file: fileType, deleteUnit: inputType) {
     if (!(file && deleteUnit)) return
     const body: inputType | undefined = await deleteInput(deleteUnit);
-    const reduceInput = file.inputTypes.filter(input => (input.id !== deleteUnit.id));
+    if (!body) return
+    const reduceInput = file.inputTypes.filter(input => (input.id !== body.id));
     const newFile: fileType = { ...file, inputTypes: reduceInput }
-    if (!newFile) return
     return newFile
 }
 export const matchEnd = (input: inputType) => {
@@ -272,6 +276,23 @@ export function reduceAddNewPost(posts: postType[], post: postType) {
     if (!posts || !post) return
     const reduce: postType[] = posts.filter(post_ => (post_.id !== post.id)).sort((a: postType, b: postType) => ((a.id as number) - (b.id as number)));
     return [...reduce, post]
+}
+
+export function inputFreeze(input: inputType) {
+    let endTags: string[] = [".png", ".jpg", ".jpeg"];
+    let bool = false;
+    const check: boolean = (input.name === "image" && input.url) ? true : false;
+    for (let i = 0; i < endTags.length; i++) {
+        if (input.s3Key?.endsWith(endTags[i]) && check) {
+            bool = true
+            break;
+        }
+    }
+    if (bool) {
+        return Object.freeze(input)
+    } else {
+        return input
+    }
 }
 
 

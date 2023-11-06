@@ -10,6 +10,9 @@ import GeneralContextProvider from '@/components/context/GeneralContextProvider'
 import MainHeader from "@/components/header/MainHeader";
 import Footer from "@component/footer/Footer";
 import InputContextProvider from "@context/InputTypeProvider"
+// import '@aws-sdk/signature-v4-crt';
+
+
 
 
 export const metadata: Metadata = {

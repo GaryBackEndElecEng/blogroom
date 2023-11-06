@@ -8,17 +8,28 @@ import { getuserFiles } from "@lib/fetchTypes";
 import getFormattedDate from "@lib/getFormattedDate"
 import Link from 'next/link';
 import { usePathname } from "next/navigation";
+import { InputContext } from '@/components/context/InputTypeProvider';
 
 
 type usernameType = {
-    getuser: userType | undefined
+    getuser: userType | undefined //files and posts are complete
 
 }
 export default function UserNameBlogs({ getuser }: usernameType) {
     const pathname = usePathname();
-    const [usersFiles, setUsersFiles] = React.useState<fileType[] | []>([]);
     const { client, setClient, setPageHit } = React.useContext(GeneralContext);
+    const { setUserFiles, userFiles } = React.useContext(InputContext);
     const [numFiles, setNumFiles] = React.useState<number>(1);
+
+    React.useEffect(() => {
+        if (!getuser) return
+        setClient(getuser);
+        setUserFiles(getuser.files)
+    }, [getuser, setUserFiles, setClient])
+
+    React.useEffect(() => {
+        setNumFiles(userFiles.length)
+    }, [setNumFiles, userFiles]);
 
     React.useEffect(() => {
         //pathname=>/blog/usershomelinks/Bob%20Brown
@@ -30,22 +41,6 @@ export default function UserNameBlogs({ getuser }: usernameType) {
         }
     }, [getuser, setPageHit, pathname]);
 
-    React.useEffect(() => {
-        if (usersFiles) {
-            setNumFiles(usersFiles.length)
-        }
-    }, [usersFiles]);
-
-
-    React.useMemo(async () => {
-        if (!(getuser && getuser.email)) return
-        // console.log(get_user.email) //works
-        const email: string = getuser.email
-        const getUsersFiles = await getuserFiles(getuser.id)
-        if (!getUsersFiles) return
-        setUsersFiles(getUsersFiles);
-        setClient(getuser)
-    }, [getuser, setClient])
 
     const link = "/blog/usershomelinks/"
     const flexcol = "flex flex-col mx-auto w-full px-3 my-2";
@@ -62,7 +57,7 @@ export default function UserNameBlogs({ getuser }: usernameType) {
             <h3 className="text-center text-[white]  underline underline-offset-8 text-2xl my-3 mb-[3vh]">blogs</h3>
 
             <section className={numFiles && numFiles === 1 ? `grid grid-cols-1 mx-auto my-2 gap-4 mx-auto px-3` : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mx-auto my-2 gap-4 mx-auto sm:px-3 mb-4"}>
-                {usersFiles && usersFiles.map((file, index) => {
+                {userFiles && userFiles.map((file, index) => {
                     if (file.published) return (
                         <main key={index} className="col-span-1 card  ">
                             {file.imageUrl && <Image src={file.imageUrl} width={600} height={400} className="aspect-video" alt={`${file.name}-${client && client.name}`} />}

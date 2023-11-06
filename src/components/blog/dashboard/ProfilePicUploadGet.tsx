@@ -1,10 +1,10 @@
 import React from 'react';
 import type { userType, gets3ProfilePicType, upload3ProfilePicType } from "@lib/Types";
-import { getS3ProfilePic, uploadProfileToS3 } from "@lib/s3ApiComponents";
+import { uploadProfileToS3 } from "@lib/s3ApiComponents";
 import { GeneralContext } from '@context/GeneralContextProvider';
 import { Button } from "@chakra-ui/react";
 import Image from 'next/image';
-import { saveUser } from "@lib/fetchTypes";
+import { getS3User, saveUser } from "@lib/fetchTypes";
 
 type mainType = {
     user: userType | null
@@ -26,17 +26,17 @@ export default function ProfilePicUploadGet({ user }: mainType) {
 
     React.useEffect(() => {
         if (!Key) return
-        if (!user) return
+
         const getImage = async (user: userType) => {
-            const userKeyPic: gets3ProfilePicType | undefined = await getS3ProfilePic(Key);
-            if (!userKeyPic) return
-            const { imageUrl } = userKeyPic;
-            let tempUser: userType = { ...user, image: imageUrl } as userType;
-            setUser(tempUser);
+            const newUser: userType | undefined = await getS3User(user);
+            if (!newUser) return
+            setUser(newUser);
             setS3Image(imageUrl);
         }
-        getImage(user)
-    }, [Key,]);
+        if ((user && !(user.image))) {
+            getImage(user as userType)
+        }
+    }, []);
 
     const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
@@ -48,14 +48,14 @@ export default function ProfilePicUploadGet({ user }: mainType) {
 
     }
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.ChangeEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!user) return
         setIsLoading(true)
-        const body = await uploadProfileToS3(e, user) as upload3ProfilePicType | undefined
-        if (!body) return
-        const { key, msg } = body
-        const modUser = { ...user, imgKey: key }
+        const body = await uploadProfileToS3(e, user) as gets3ProfilePicType | undefined
+        if (!body) return null
+        const { key, imageUrl } = body
+        const modUser = { ...user, imgKey: key, image: imageUrl }
         setKey(key);
         const newUserWithimg = await saveUser(modUser)
         if (!newUserWithimg) return
@@ -67,7 +67,7 @@ export default function ProfilePicUploadGet({ user }: mainType) {
     const cirImage = "border border-white shadow shadow-blue-300 p-1 rounded-full"
     return (
         <div className="flex flex-col items-start justify-evenly">
-            <form action="" onSubmit={(e) => handleSubmit(e)}
+            <form action="" onSubmit={handleSubmit}
                 className="flex flex-row flex-wrap justify-around items-center gap-3 text-xs"
             >
                 <label htmlFor="file" className="text-xs">pic upload</label>

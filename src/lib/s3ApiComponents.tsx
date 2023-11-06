@@ -1,16 +1,26 @@
+
+"use server"
 import axios from 'axios';
 import { v4 as uuidv4 } from "uuid";
-import { fileType, gets3ImageType, gets3ProfilePicType, mediaType, postType, userType } from './Types';
-import { inputType } from '@lib/Types';
-import S3 from "aws-sdk/clients/s3";
+import { fileType, inputType, gets3ImageType, gets3ProfilePicType, mediaType, postType, userType } from '@lib/Types';
 
-export const s3 = new S3({
-    apiVersion: "2006-03-01",
-    accessKeyId: process.env.SDK_ACCESS_KEY,
-    secretAccessKey: process.env.SDK_ACCESS_SECRET,
-    region: process.env.BUCKET_REGION,
-    signatureVersion: "v4"
-})
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import "@aws-sdk/signature-v4-crt";
+
+const Bucket = process.env.BUCKET_NAME as string
+const region = process.env.BUCKET_REGION as string
+const accessKeyId = process.env.SDK_ACCESS_KEY as string
+const secretAccessKey = process.env.SDK_ACCESS_SECRET as string
+
+export const s3 = new S3Client({
+    region,
+    credentials: {
+        accessKeyId,
+        secretAccessKey
+    }
+
+});
 
 type masterData = {
     data: mainData
@@ -28,29 +38,29 @@ export async function uploadToS3(e: React.FormEvent<HTMLFormElement>, imageObj: 
     const file: File = formdata.get("file") as File
     if (!file) return null
     const ext = file.type.split("/")[1]
-    const Key = `${imageObj.s3Key}.${ext}`
     // console.log("key", key)
-    const fileType = new URLSearchParams(file.type).toString();
+    const Key = `${file?.name.split(".")[0]}-${imageObj.s3Key}.${ext}`
     formdata.append("file", file);
-    formdata.append("filename", file?.name);
+    formdata.append("Key", Key);
+
 
     try {
-        //api/media has req.query.fileType/& Key
-        const { data } = await axios.get(`/api/media?fileType=${fileType}&Key=${Key}`);
-        const { uploadUrl, key, msg } = data;
-        // doing a put requestmsg={loaded,message}
-        if (msg.loaded) {
-            await axios.put(uploadUrl, file);
-            return { key: key, msg }
-        } else {
-            return { key: key, msg }
-        }
+        await fetch("/api/uploadImage", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: formdata
+        });
+        const res = await fetch(`/api/downloadimg?Key=${Key}`);
+        const body: gets3ImageType = await res.json();
+        return body
 
     } catch (error) {
         throw new Error("did not get urlkey")
     }
 }
-export async function uploadProfileToS3(e: React.FormEvent<HTMLFormElement>, user: userType) {
+export async function uploadProfileToS3(e: React.ChangeEvent<HTMLFormElement>, user: userType) {
     e.preventDefault();
     const genUuid = uuidv4().split("-")[0]
     if (!(user.name)) return
@@ -63,73 +73,32 @@ export async function uploadProfileToS3(e: React.FormEvent<HTMLFormElement>, use
     const ext = file.type.split("/")[1]
     const key = `${userImage}.${ext}`
     const Key = `${userImage}.${ext}`
-    const fileType = new URLSearchParams(file.type).toString();
     formdata.append("file", file);
-    formdata.append("filename", file?.name);
-    formdata.append("userImage", key);
+    // formdata.append("filename", file?.name);
+    formdata.append("Key", key);
 
     try {
         //api/media has req.query.fileType/& Key
-        const { data } = await axios.get(`/api/media?fileType=${fileType}&Key=${Key}`);
-        const { uploadUrl, key, msg } = data;
-        // doing a put requestmsg={loaded,message}
-        if (msg.loaded) {
-            await axios.put(uploadUrl, file);
-            return { key: key, msg }
-        } else {
-            return { key: key, msg }
-        }
+        await fetch("/api/uploadImage", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: formdata
+        });
+        const res = await fetch(`/api/downloadimg?Key=${key}`);
+        const body: gets3ProfilePicType = await res.json();
+        return body;
+
 
     } catch (error) {
         throw new Error("did not get urlkey")
     }
 }
-//SAVEFILE IN FETCHTYPES RETURNS THE PRESIGNED URL: THIS FUNCTION IS ONLY USED IN SPECIAL CASES:
-//NOTE ALL GET FILES HAVE PRESIGNED URL!!!!!!!!
-export async function gets3Image(Key: string | null, fileType: string, fileID: string) {
-    let missing: string | undefined;
-    if (!(Key && fileID && fileType)) return
-    try {
-        //api/media has req.query.fileType/& Key
-        const { data } = await axios.get(`/api/getmedia?fileType=${fileType}&Key=${Key}&fileID=${fileID}`);
-        const body: gets3ImageType = data;
-        // givin a temp url to get image
-        missing = switchFunct(data)
-        return body
-
-    } catch (error) {
-        throw new Error(`did not get the following:${missing}`)
-    }
-}
-export async function getS3ProfilePic(Key: string | undefined) {
-
-    if (!(Key)) return
-    try {
-        //api/media has req.query.fileType/& Key
-        const { data } = await axios.get(`/api/getprofilepic?Key=${Key}`);
-        const body: gets3ProfilePicType = data;
-        // givin a temp url to get image
-        return body
-
-    } catch (error) {
-        console.error(new Error("did not get user's image S3 URL"))
-    }
-}
 
 
-function switchFunct(data: gets3ImageType) {
-    const { imageUrl, key, msg, imageObj } = data;
-    switch (false) {
-        case (!imageUrl):
-            return "uploadUrl";
-        case (!key):
-            return "key";
-        case (!msg):
-            return "msg"
-        default:
-            return "data was undefined"
-    }
-}
+
+
 
 export async function fileUploadToS3(e: React.FormEvent<HTMLFormElement>, file: fileType) {
     e.preventDefault();
@@ -141,176 +110,169 @@ export async function fileUploadToS3(e: React.FormEvent<HTMLFormElement>, file: 
     const Key = `${genKey}.${ext}`
     const fileType = new URLSearchParams(file_.type).toString();
     formdata.append("file", file_);
-    formdata.append("filename", file_?.name);
+    formdata.append("Key", Key);
 
     try {
-        //api/media has req.query.fileType/& Key
-        const { data } = await axios.get(`/api/media?fileType=${fileType}&Key=${Key}`);
-        const { uploadUrl, key, msg } = data;
-        // doing a put requestmsg={loaded,message}
-        if (msg.loaded) {
-            await axios.put(uploadUrl, file_);
-            return { key: key, msg }
-        } else {
-            return { key: key, msg }
+        const options = {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/x-www-form-urlenc",
+            },
+            body: formdata
         }
+        await fetch(`/api/uploadImage`, options);
+
+        const res = await fetch(`api/downloadimg?Key=${Key}`);
+        const body: gets3ProfilePicType = await res.json();
+        return body
 
     } catch (error) {
         throw new Error("did not get urlkey")
     }
 }
-export async function imgPostUploadToS3(e: React.FormEvent<HTMLFormElement>, user: userType) {
+export async function imgPostUploadToS3(e: React.ChangeEvent<HTMLFormElement>, user: userType): Promise<gets3ProfilePicType | undefined> {
     e.preventDefault();
     if (!user! || !user.name) return
     const formdata = new FormData(e.currentTarget);
     const file_: File = formdata.get("file") as File;
-    if (!file_) return null
-    const ext = file_.type.split("/")[1];
+    if (!file_) return
     const encodeUsername = user.name.replace(" ", "-")
     const genKey = `${user.id}-${encodeUsername}/${uuidv4().split("-")[0]}-${file_.name}`
-    const key = `${genKey}`
-    const fileType = new URLSearchParams(file_.type).toString();
+    const key = genKey
     const Key = `${genKey}`;
     formdata.append("file", file_);
-    formdata.append("filename", file_?.name);
+    formdata.append("Key", Key);
 
     try {
-        //api/media has req.query.fileType/& Key
-        const { data } = await axios.get(`/api/media?fileType=${fileType}&Key=${Key}`);
-        const { uploadUrl, key, msg } = data;
-        // doing a put requestmsg={loaded,message}
-        if (msg.loaded) {
-            await axios.put(uploadUrl, file_);
-            return { key: key, msg }
-        } else {
-            return { key: key, msg }
+        const options = {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/x-www-form-urlenc",
+            },
+            body: formdata
         }
+        await fetch(`/api/uploadImage`, options);
+
+        const res = await fetch(`api/downloadimg?Key=${Key}`);
+        const body: gets3ProfilePicType = await res.json();
+        return body
 
     } catch (error) {
         throw new Error("did not get urlkey")
     }
 }
 
-const matchEnd = (input: inputType) => {
-    let arr: string[] = [".png", ".jpeg", ".Web", "PNG", "JPEG"]
-    let check: boolean = false;
-    arr.forEach((end, index) => {
-        if (input.s3Key?.endsWith(end)) {
-            return check = true
-        }
-    });
-    return check
-}
 
-export function insertUrls(file: fileType) {
+
+export async function insertFileUrls(file: fileType) {
     // if (!file) return
     let tempFile: fileType = file;
     if (!tempFile.imageKey) return tempFile
-    let checkS3 = checkS3KeyEnd(tempFile.imageKey)
+    let checkS3 = await checkS3KeyEnd(tempFile.imageKey)
     if (!checkS3) return tempFile
     const s3Params = {
-        Bucket: process.env.BUCKET_NAME as string,
+        Bucket,
         Key: tempFile.imageKey,
     };
-    const imageUrl = s3.getSignedUrl(
-        "getObject", s3Params
-    );
-    tempFile.imageUrl = imageUrl;
+    // const imageUrl = s3.getSignedUrl(
+    //     "getObject", s3Params
+    // );
+    const command = new GetObjectCommand(s3Params)
+    tempFile.imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
     if (!tempFile.inputTypes || !(tempFile.inputTypes?.length > 0)) return tempFile
-    tempFile.inputTypes.map((input, index) => {
-        if (!input.s3Key) return input
-        let checkS3 = checkS3KeyEnd(input.s3Key)
-        if (!checkS3 || input.name !== "image") return input
-        const s3Params = {
-            Bucket: process.env.BUCKET_NAME as string,
-            Key: input.s3Key,
-        };
-        const imageUrl = s3.getSignedUrl(
-            "getObject", s3Params
-        );
-        input.url = imageUrl;
-        return input
-    });
+    let inputs = tempFile.inputTypes;
+    let Arr: inputType[] = [];
+    Arr = await insertInputsUrl(inputs as inputType[]);
+    tempFile = { ...tempFile, inputTypes: Arr }
     return tempFile
 }
+export async function insertInputsUrl(inputs: inputType[]) {
+    const arr: inputType[] = await Promise.all(
+        inputs.map(async (input) => {
+            return await insertInputUrl(input)
+        })
+    )
+    return arr
+}
 
-export function checkS3KeyEnd(s3Key: string | undefined) {
+export async function insertInputUrl(input: inputType) {
+    if (input.name !== "image" && !input.s3Key) return input;
+    let checkS3 = await checkS3KeyEnd(input.s3Key as string)
+    if (!checkS3) return input
+    const s3Params = {
+        Bucket: process.env.BUCKET_NAME as string,
+        Key: input.s3Key as string,
+    };
+    const command = new GetObjectCommand(s3Params);
+    input.url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    return input
+}
+
+export async function checkS3KeyEnd(s3Key: string | undefined) {
     if (!s3Key) return false
     const arrEnds = [".png", ".jpeg", ".web"];
     let check: boolean = arrEnds.find(end => (s3Key.endsWith(end))) ? true : false
     return check
 }
 //THIS RETURNS ALL S3 URL TO AN ARRAY OF FILES AND WORKS!!
-export function retUrlInserts(files: fileType[]) {
-
-    const getFiles = files.map(file => {
-        if (!(file && file?.imageKey && file?.imageUrl)) return file
-        let check: boolean = checkS3KeyEnd(file?.imageKey);
-        if (!check) return file
-        const s3Params = {
-            Bucket: process.env.BUCKET_NAME as string,
-            Key: file.imageKey,
-        };
-        const imageUrl = s3.getSignedUrl(
-            "getObject", s3Params
-        );
-        file.imageUrl = imageUrl;
-        if (!file.inputTypes) return file
-        file.inputTypes.map((input, index) => {
-            return retUrlInput(input)
-        });
-        return file
-    });
-    return getFiles
+export async function insertFilesUrls(files: fileType[]) {
+    const fileArr: fileType[] = await Promise.all(
+        files.map(async (file: fileType) => {
+            return await insertFileUrls(file)
+        })
+    )
+    return fileArr
 }
-export function retUrlInput(input: inputType) {
-    if (input.name !== "image" || !input.s3Key) return input
-    let checkS3Key = checkS3KeyEnd(input.s3Key)
-    if (!checkS3Key) return input
-    const s3Params = {
-        Bucket: process.env.BUCKET_NAME as string,
-        Key: input.s3Key,
-    };
-    const imageUrl = s3.getSignedUrl(
-        "getObject", s3Params
-    );
-    input.url = imageUrl;
-    return input
+export async function gets3Users(users: userType[]) {
+
+    const getUsers = await Promise.all(
+        users.map(async (user) => {
+            return await insertImgUser(user)
+        })
+    )
+    return getUsers
 
 }
-export function getProfilePic(key: string) {
+export async function insertImgUser(user: userType) {
+
+    if (!user.imgKey) return user
+    const userimage = await getProfilePic(user.imgKey);
+    user.image = userimage ? userimage : undefined;
+    return user
+}
+
+export async function getProfilePic(key: string) {
     if (!key) return null
-    let checkS3Key = checkS3KeyEnd(key)
+    let checkS3Key = await checkS3KeyEnd(key)
     if (!checkS3Key) return null
-    const s3Params = {
-        Bucket: process.env.BUCKET_NAME as string,
-        Key: key,
-    };
-    const imageUrl = s3.getSignedUrl(
-        "getObject", s3Params
-    );
-    return imageUrl
+    const res = await fetch(`/api/getprofilepic?Key=${key}`);
+    if (res.ok) {
+        const body: gets3ProfilePicType = await res.json();
+        return body.imageUrl
+    } else {
+        return null
+    }
 
 }
 
-export function insertUrlPost(post: postType) {
+export async function insertUrlPost(post: postType) {
     if (!post.s3Key) return post
-    let checkS3Key = checkS3KeyEnd(post.s3Key)
+    let checkS3Key = await checkS3KeyEnd(post.s3Key)
     if (!checkS3Key) return post
     const s3Params = {
         Bucket: process.env.BUCKET_NAME as string,
         Key: post.s3Key,
     };
-    const imageUrl = s3.getSignedUrl(
-        "getObject", s3Params
-    );
-    post.imageUrl = imageUrl;
+    const command = new GetObjectCommand(s3Params);
+    post.imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
     return post
 
 }
-export function insertUrlPosts(posts: postType[]) {
+export async function insertUrlPosts(posts: postType[]) {
     if (!posts) return
-    return posts.map(post => insertUrlPost(post))
-
+    const arrPost: postType[] = await Promise.all(
+        posts.map(async (post) => await insertUrlPost(post))
+    )
+    return arrPost
 
 }
