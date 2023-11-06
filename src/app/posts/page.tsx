@@ -10,7 +10,9 @@ export default async function page() {
     const posts: postType[] | undefined = await getPosts() as postType[];
     const getusers: userType[] | undefined = await getUsers();
     return (
-        <Posts get_users={getusers} get_posts={posts} />
+        <>
+            {/* <Posts get_users={getusers} get_posts={posts} /> */}
+        </>
     )
 
 

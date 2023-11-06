@@ -10,12 +10,14 @@ const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site
 export default async function filenamePage({ params }: { params: { fileID: string } }) {
 
     const file = await getFileDetail(params.fileID as string)
-    // console.log("FILES", file, params)
+
 
     return (
         <div>
             {file ?
-                <UserBlogItem file={file} />
+                <>
+                    {/* <UserBlogItem file={file} /> */}
+                </>
                 :
                 <div className="text-center-text-2xl font-bold">Could not find the file</div>
             }

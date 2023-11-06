@@ -14,12 +14,14 @@ export default async function userNames({ params }: { params: { username: string
     const decodename = username.replace("-", " ");
     //FILES AND POSTS ARE COMPLETE AND USER OWNED
     let get_user: userType | undefined = await getUserUserName(decodename);
-    console.log(decodename)
+
 
 
     if (get_user) {
         return (
-            <UserNameBlogs getuser={get_user && get_user} />
+            <>
+                {/* <UserNameBlogs getuser={get_user && get_user} /> */}
+            </>
         )
     } else {
         return (
