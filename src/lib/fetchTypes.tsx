@@ -1,13 +1,13 @@
 import type { paramsType, fetchFilesType, fileType, fetchAllType, fetchSingleFileType, inputType, userType, contactType, mainPageHit, s3mediaType, linkType, postType, likefileType, likepostType, ratefileType, ratepostType } from "@lib/Types";
-const csrf = process.env.NEXTAUTH_CSRF as string;
-const local = process.env.NEXT_PUBLIC_local as string;
-const public_ = process.env.NEXT_PUBLIC_site as string;
+// const csrf = process.env.NEXTAUTH_CSRF as string;
+// const local = process.env.NEXT_PUBLIC_local as string;
+// const public_ = process.env.NEXT_PUBLIC_site as string;
 
-axios.defaults.baseURL = (process.env.NODE_ENV === "production") ? public_ : local;
-axios.defaults.headers.common['Authorization'] = csrf;
-axios.defaults.headers.post['Content-Type'] = 'application/json';
-axios.defaults.headers.put['Content-Type'] = 'application/x-www-form-urlencoded ,multipart/form-data';
-axios.defaults.headers.get['Content-Type'] = 'application/json';
+// axios.defaults.baseURL = (process.env.NODE_ENV === "production") ? public_ : local;
+// axios.defaults.headers.common['Authorization'] = csrf;
+// axios.defaults.headers.post['Content-Type'] = 'application/json';
+// axios.defaults.headers.put['Content-Type'] = 'application/x-www-form-urlencoded ,multipart/form-data';
+// axios.defaults.headers.get['Content-Type'] = 'application/json';
 import axios from "axios";
 
 // export const config = { runtime: 'experimental-edge' }
