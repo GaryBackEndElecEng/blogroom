@@ -7,7 +7,7 @@ import type { userType, registerType } from "@lib/Types";
 async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === "POST") {
         const getBody: registerType = req.body;
-        const { name, email, password, emailVerified } = getBody;
+        const { name, email, password, imgKey } = getBody;
         //----password is hashed at client browser---//
         try {
             const isUser = await prisma.user.upsert({
@@ -16,7 +16,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 },
                 update: {},
                 create: {
-                    ...req.body
+                    name: name,
+                    email: email,
+                    password: password,
+                    imgKey: imgKey ? imgKey : null
                 },
                 include: {
                     files: true

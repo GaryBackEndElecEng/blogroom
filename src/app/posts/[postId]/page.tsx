@@ -4,7 +4,7 @@ import axios from 'axios'
 import React from 'react';
 import DetailPost from "@component/posts/DetailPost";
 import { Metadata, ResolvingMetadata } from 'next';
-import { getDetailPost } from "@lib/serverGets";
+import { getPostDetail } from "@lib/serverGets";
 
 const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site : process.env.NEXT_PUBLIC_local
 
@@ -15,7 +15,7 @@ type params = {
 
 export default async function postdetail({ params }: { params: { postId: string } }) {
     const postId: number = parseInt(params.postId)
-    const post: postType | undefined = await getDetailPost(postId);
+    const post: postType | undefined = await getPostDetail(postId);
 
     if (post) {
         return (

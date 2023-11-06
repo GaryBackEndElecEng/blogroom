@@ -1,10 +1,11 @@
 import React from 'react';
-import type { gets3ProfilePicType, upload3ProfilePicType, userType } from "@lib/Types";
+import type { gets3ProfilePicType, s3mediaType, userType } from "@lib/Types";
 import { uploadProfileToS3 } from "@lib/s3ApiComponents";
 import { GeneralContext } from '@context/GeneralContextProvider';
 import { Button } from "@chakra-ui/react";
 import Image from 'next/image';
-import { saveUser } from "@lib/fetchTypes";
+// import { saveUser } from "@lib/fetchTypes";
+import { v4 as uuidv4 } from "uuid";
 
 
 type mainType = {
@@ -20,21 +21,24 @@ export default function UploadDisplayPic({ Data, setData }: mainType) {
     const [tempImg, setTempImg] = React.useState<string | null>(null);
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, Data: userType) => {
         e.preventDefault();
         if (!Data) return
         setIsLoading(true)
-        const body = await uploadProfileToS3(e, Data) as gets3ProfilePicType | undefined
-        if (!body) {
-            return setMsg({ loaded: false, msg: "upload failed" })
+        console.log("@submit", Data)
+        try {
+            const res = await fetch(`/api/media?Key=${Data.imgKey}`);
+            const body: s3mediaType = await res.json();
+            console.log("BODY", body)
+            setTempImg(body.url);
+        } catch (error) {
+
         }
         setMsg({ loaded: true, msg: "uploaded" })
-        const { key, imageUrl } = body
-        const modUser = { ...Data, imgKey: key } as userType;
-        setKey(key);
-        setData(modUser)
+
         setIsLoading(false)
-        setTempImg(imageUrl)
+
 
     }
 
@@ -42,6 +46,26 @@ export default function UploadDisplayPic({ Data, setData }: mainType) {
         e.preventDefault();
         if (!e.currentTarget.files) return
         const fileImg = e.currentTarget.files[0]
+        const username = Data.name as string
+        const genKey = `${uuidv4().split("-")[0]}-${username?.trim().replace(" ", "-")}-${fileImg.name}`
+        const formdata = new FormData();
+        formdata.set("file", fileImg);
+        formdata.set("Key", genKey);
+        setData({ ...Data, imgKey: genKey });
+        setKey(genKey);
+
+
+        try {
+            const res = await fetch(`/api/uploadImage`, {
+                method: "PUT",
+                body: formdata
+            });
+            if (res.ok) {
+                return setMsg({ loaded: true, msg: "Saved" })
+            }
+        } catch (error) {
+
+        }
         //inserting temp img
         const tempImg_ = URL.createObjectURL(fileImg);
         setTempImg(tempImg_)
@@ -59,7 +83,8 @@ export default function UploadDisplayPic({ Data, setData }: mainType) {
                     id="file"
                     type="file"
                     name="file"
-                    accept="image/png,image/jpeg,image/webP,image/svg"
+                    required
+                    accept="image/png image/jpeg image/jpg"
                     onChange={onFileChange}
                 />
                 <div>

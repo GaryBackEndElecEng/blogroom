@@ -60,6 +60,7 @@ export type registerType = {
   email: string,
   emailVerified?: Date,
   password: string | null,
+  imgKey?:string
 }
 
 export type inputType = {

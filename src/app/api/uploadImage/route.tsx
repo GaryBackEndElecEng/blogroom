@@ -24,6 +24,7 @@ export async function PUT(req: NextRequest) {
     const formdata = await req.formData() as FormData;
     const file: File | null = formdata.get("file") as unknown as File;
     const Key: string | null = formdata.get("Key") as unknown as string;
+
     if (!file) {
         return NextResponse.json({ error: "file doesn't exist" }, { status: 404 })
     }

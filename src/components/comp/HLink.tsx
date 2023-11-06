@@ -8,6 +8,7 @@ import DeletePopUp2 from "@component/comp/DeletePopUp2";
 import { InputContext } from '../context/InputTypeProvider';
 import { updateInput, storeLinks } from '@/lib/fetchTypes';
 import SavedMsg from './SavedMsg';
+import { updatefileInput } from '@/lib/generalFunc';
 
 type hlinkType = {
     input: inputType
@@ -45,10 +46,11 @@ export default function HLink({ input }: hlinkType) {
         if (!pass) return setMsg({ loaded: false, msg: "must start with http:// or https:// and end with .com/ca/eu,,,,etc" })
         if (!hlink) return
         setIsSaved(false);
-        const update_file = await updateInput(hlink);
-        if (!update_file) return
-        if (update_file) {
-            setFile(update_file);
+        const update_input = await updateInput(hlink);
+        if (!file) return
+        if (update_input) {
+            const newFile = updatefileInput(file, update_input)
+            setFile(newFile);
             setSaved({ loaded: true, msg: "saved" })
             setIsSaved(true);
             await SaveLink();
