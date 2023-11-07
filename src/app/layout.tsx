@@ -10,7 +10,7 @@ import GeneralContextProvider from '@/components/context/GeneralContextProvider'
 import MainHeader from "@/components/header/MainHeader";
 import Footer from "@component/footer/Footer";
 import InputContextProvider from "@context/InputTypeProvider"
-// import '@aws-sdk/signature-v4-crt';
+import ErrorBoundary from "@/app/error";
 
 
 
@@ -111,6 +111,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+
   return (
     <html lang="en">
 
@@ -119,12 +120,14 @@ export default function RootLayout({
           <GeneralContextProvider>
             <InputContextProvider>
               <NavBar />
-              <div className="mx-auto lg:container bg-slate-900 min-h-[100vh]">
+              <div className="mx-auto lg:container bg-slate-900 min-h-[100vh] relative">
+
 
                 <MainHeader />
 
 
                 {children}
+
 
               </div>
               <Footer />

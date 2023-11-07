@@ -11,7 +11,7 @@ export default async function page() {
     const getfiles: fileType[] | [] = await getGenFiles() as fileType[];
     return (
         <>
-            {/* <AllBlogs get_users={get_users} getfiles={getfiles} /> */}
+            <AllBlogs get_users={get_users} getfiles={getfiles} />
         </>
 
     )

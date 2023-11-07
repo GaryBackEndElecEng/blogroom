@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { getUserMeta } from '@/lib/fetchTypes';
 
 export default function HomeLinksHeader() {
+    const { setGetError } = React.useContext(GeneralContext)
     const url = "/images/gb_logo.png";
     const pathname = usePathname();
     const { pageHit, setClient, client } = React.useContext(GeneralContext);
@@ -37,10 +38,14 @@ export default function HomeLinksHeader() {
     React.useMemo(async () => {
         if (username) {
             const getuser = await getUserMeta(username);
-            if (!getuser) return
+            if (!getuser) {
+                let message: string = `did not get userdata@api/getusermeta in HomeLinksHeader`
+                setGetError(message)
+                return
+            }
             setClient(getuser)
         }
-    }, [username, setClient]);
+    }, [username, setClient, setGetError]);
 
     const container = `${styles.containerImage} lg:container mx-auto mb-2 p-1 pb-2`
     const sectionStyle = "flex flex-col justify-center items-center mx-auto sm:h-[36vh] h-[30vh] lg:h-[40vh] relative "

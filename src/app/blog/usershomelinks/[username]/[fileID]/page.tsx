@@ -16,7 +16,7 @@ export default async function filenamePage({ params }: { params: { fileID: strin
         <div>
             {file ?
                 <>
-                    {/* <UserBlogItem file={file} /> */}
+                    <UserBlogItem file={file} />
                 </>
                 :
                 <div className="text-center-text-2xl font-bold">Could not find the file</div>

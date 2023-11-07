@@ -7,7 +7,7 @@ export default async function homelinks() {
     // const get_users = await getUsers();
     return (
         <div>
-            {/* <UsersHomeLinks getusers={get_users} /> */}
+            <UsersHomeLinks />
         </div>
     )
 }

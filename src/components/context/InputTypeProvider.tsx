@@ -5,6 +5,7 @@ import { updateFile } from "@lib/generalFunc";
 import { v4 as uuidv4 } from 'uuid';
 import { saveToStorage } from '@/lib/storePullLocStorage';
 import { inputType, dateType, fileType, msgType, IDCollectorType, inputArrType, masterfileType, inputArr, linkType } from "@lib/Types";
+import { getErrorMessage } from '@/lib/errorBoundaries';
 
 
 type inputContextType = {
@@ -83,21 +84,28 @@ export default function InputTypes(Props: any) {
     file: fileType
   ) {
     if (!select) return
-    const encode = uuidv4().split("-")[0];
-    const encode1 = uuidv4().split("-")[1];
-    const s3KeyGen = `${encode}-${select}-${encode1}`;
-    const genInput: inputType = {
-      name: select,
-      content: select,
-      url: null,
-      s3Key: s3KeyGen,
-      type: select === "image" ? "image/png" : "text",
-      fileId: file.id
+    try {
+
+      const encode = uuidv4().split("-")[0];
+      const encode1 = uuidv4().split("-")[1];
+      const s3KeyGen = `${encode}-${select}-${encode1}`;
+      const genInput: inputType = {
+        name: select,
+        content: select,
+        url: null,
+        s3Key: s3KeyGen,
+        type: select === "image" ? "image/png" : "text",
+        fileId: file.id
+      }
+      const recFile = await addInput(genInput);
+      if (!recFile) return file
+      setSaved({ loaded: true, msg: "Newly selected added to file" })
+      return recFile
+    } catch (error) {
+      let message: string = `${getErrorMessage(error)}@api/page-hit`
+      alert(message)
+      return
     }
-    const recFile = await addInput(genInput);
-    if (!recFile) return file
-    setSaved({ loaded: true, msg: "Newly selected added to file" })
-    return recFile
 
   }
   ///GETTING LINKS

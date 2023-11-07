@@ -2,7 +2,7 @@
 import React from 'react';
 import MainDashboard from "@/components/blog/dashboard/MainDashboard"
 import { getUserAccount, getUser_ } from "@lib/serverGets";
-import { getEmailUser } from "@lib/fetchTypes";
+// import { getEmailUser } from "@lib/fetchTypes";
 
 
 export default async function page() {

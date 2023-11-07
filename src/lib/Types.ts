@@ -19,8 +19,8 @@ export type sessionType = Session
 
 export type userType = {
   id: string,
-  name: string | null,
-  email: string | null,
+  name: string,
+  email: string,
   emailVerified: Date | null,
   password: string | undefined,
   imgKey:string | undefined,
@@ -28,13 +28,18 @@ export type userType = {
   image: string | undefined,
   files: fileType[],
   posts:postType[],
-  accounts: accountType[],
-  hits:mainPageHit[]
+  accounts?: accountType[],
+  hits?:mainPageHit[]
 }
 export type userTypeShort = {
   id?: string,
-  name?: string,
-  email?: string,
+  name: string,
+  email: string,
+  imgKey:string | undefined,
+  bio?:string,
+  image: string | undefined,
+  files: fileType[],
+  posts:postType[],
   
 }
 

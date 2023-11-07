@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import BlogHeader from "@component/header/BlogHeader";
+import GetError from "@component/comp/GetError"
 
 export const metadata: Metadata = {
     title: {
@@ -39,6 +40,7 @@ export default function BlogLayout({
     return (
         <div>
             <BlogHeader />
+            <GetError />
             {children}
         </div>
     )

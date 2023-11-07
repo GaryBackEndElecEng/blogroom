@@ -5,7 +5,7 @@ import { fileType, userType } from '@/lib/Types';
 import UserBlogItem from "@/components/blog/users/UserBlogItem";
 import { getFileDetail } from "@lib/serverGets";
 
-const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site : process.env.NEXT_PUBLIC_local
+// const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site : process.env.NEXT_PUBLIC_local
 
 
 export default async function page({ params }: { params: { fileID: string } }) {

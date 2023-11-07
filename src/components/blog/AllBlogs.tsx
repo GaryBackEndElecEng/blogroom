@@ -33,7 +33,7 @@ type UserBlogType = {
 
 export default function AllBlogs({ get_users, getfiles }: UserBlogType) {
     const { allFiles, setAllFiles } = React.useContext(InputContext);
-    const { setPageHit, setUsers, users } = React.useContext(GeneralContext);
+    const { setPageHit, setUsers, users, setGetError } = React.useContext(GeneralContext);
     const [msg, setMsg] = React.useState<msgType>({} as msgType);
     const [tempFiles, setTempFiles] = React.useState<fileType[]>([])
 
@@ -43,8 +43,9 @@ export default function AllBlogs({ get_users, getfiles }: UserBlogType) {
             setMsg({ loaded: true, msg: "loaded" });
         } else {
             setMsg({ loaded: false, msg: "no users" });
+            setGetError("did not get users@ blogs/=>AllBlogs")
         }
-    }, [setUsers, get_users]);
+    }, [setUsers, get_users, setGetError]);
 
 
 

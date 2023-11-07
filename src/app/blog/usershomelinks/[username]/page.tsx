@@ -1,75 +1,60 @@
 
 import React from 'react';
-import { getUserUserName } from "@lib/serverGets";
-// import { getUsers } from "@lib/fetchTypes";
+
 import UserNameBlogs from "@/components/blog/users/UserNameBlogs";
 import type { Metadata, ResolvingMetadata } from 'next';
-// import {usershomelinks_Metadata} from "@meta/dynamicMeta";
-import { userType } from '@/lib/Types';
 
-const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site : process.env.NEXT_PUBLIC_local
+// const url = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_site : process.env.NEXT_PUBLIC_local
 
-export default async function userNames({ params }: { params: { username: string } }) {
+export default async function userName({ params }: { params: { username: string } }) {
     const { username } = params;
     const decodename = username.replace("-", " ");
+    // console.log("DECODEUSERNAME", decodename)WORKS
     //FILES AND POSTS ARE COMPLETE AND USER OWNED
-    let get_user: userType | undefined = await getUserUserName(decodename);
+    return (
+        <>
+            <UserNameBlogs username={username} />
+        </>
+    )
 
-
-
-    if (get_user) {
-        return (
-            <>
-                {/* <UserNameBlogs getuser={get_user && get_user} /> */}
-            </>
-        )
-    } else {
-        return (
-            <div className="grid place-items-center h-screen">
-                <h2 className="text-center mx-auto text-slate-200">
-                    could not find the user you are looking for
-                </h2>
-            </div>
-        )
-    }
 }
 
-type Props = {
-    params: { username: string }
-    searchParams: { [key: string]: string | string[] | undefined }
-}
+// type Props = {
+//     params: { username: string }
+//     searchParams: { [key: string]: string | string[] | undefined }
+// }
 
-export async function generateMetadata(
-    { params }: Props,
-    parent: ResolvingMetadata
-): Promise<Metadata> {
-    // read route params
-    const username = params.username
+// export async function generateMetadata(
+//     { params }: Props,
+//     parent: ResolvingMetadata
+// ): Promise<Metadata> {
+//     // read route params
+//     const username = params.username
 
-    // fetch data
-    const user_name = username.replace("-", " ")
-    const res = await fetch(`${url}/api/getusermeta?username=${username}`);
-    const body: userType = await res.json();
-    const image = (body && body.image) ? body.image : "/images/gb_logo.png"
+//     // fetch data
+//     const user_name = username.replace("-", " ")
+//     const res = await fetch(`/api/getusermeta?username=${username}`);
+//     const body: userType = await res.json();
+//     const image = (body && body.image) ? body.image : "/images/gb_logo.png"
 
-    // console.log("BIO", body?.bio, body)
-    // optionally access and extend (rather than replace) parent metadata
-    const previousImages = (await parent).openGraph?.images || [];
-    const prevDesc = (await parent).description;
-    const prevKwds = (await parent).keywords;
-    const bio = (body && body.bio && prevDesc) ? [body.bio, prevDesc].join(": general :") : `${user_name} home blog page where interesting blogs can be found`;
+//     // console.log("BIO", body?.bio, body)
+//     // optionally access and extend (rather than replace) parent metadata
+//     const previousImages = (await parent).openGraph?.images || [];
+//     const prevDesc = (await parent).description;
+//     const prevKwds = (await parent).keywords;
+//     const bio = (body && body.bio && prevDesc) ? [body.bio, prevDesc].join(": general :") : `${user_name} home blog page where interesting blogs can be found`;
 
 
-    return {
-        title: `${user_name}- Blog Room Page`,
-        description: bio,
-        authors: [{ name: user_name }, { name: "Gary Wallace" }],
-        keywords: prevKwds && [...prevKwds, `${user_name}`, `${user_name} home page`],
-        creator: user_name,
-        publisher: user_name,
-        openGraph: {
-            images: [image, ...previousImages],
-            description: `${body && body.bio && body.bio} - test here`
-        },
-    }
-}
+//     return {
+//         title: `${user_name}- Blog Room Page`,
+//         description: bio,
+//         authors: [{ name: user_name }, { name: "Gary Wallace" }],
+//         keywords: prevKwds && [...prevKwds, `${user_name}`, `${user_name} home page`],
+//         creator: user_name,
+//         publisher: user_name,
+//         openGraph: {
+//             images: [image, ...previousImages],
+//             description: `${body && body.bio && body.bio} - test here`
+//         },
+//     }
+// }

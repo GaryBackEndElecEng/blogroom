@@ -20,10 +20,11 @@ export default function GetLinkHits({ files }: main_Type) {
     }, [setGetlinks]);
 
     React.useMemo(async () => {
-        if (!user) return
-        const getUserFilesandinputs = await getuserFiles(user.id);
-        if (!getUserFilesandinputs) return
-        setGetUserFilesAndInput(getUserFilesandinputs)
+        if (user && user.id) {
+            const getUserFilesandinputs = await getuserFiles(user.id);
+            if (!getUserFilesandinputs) return
+            setGetUserFilesAndInput(getUserFilesandinputs)
+        }
     }, [user]);
 
     React.useEffect(() => {

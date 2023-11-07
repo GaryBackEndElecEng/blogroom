@@ -34,11 +34,10 @@ export default function QuestReply({ input, setOpenReply, openReply }: replyType
 
     React.useEffect(() => {
         if (!user) return
-        if (!dataReply) return
-        if (!pathname) return
-
-        setDataReply({ ...dataReply, userId: user.id });
-    }, [user, pathname, setDataReply]);
+        if (dataReply) {
+            setDataReply({ ...dataReply, userId: user.id as string });
+        }
+    }, [user]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         if (dataReply && dataReply.content && dataReply.subject) {

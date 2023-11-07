@@ -4,7 +4,7 @@ import React from 'react';
 import type { userAccountType, msgType, userType, mainPageHit, contactType, postType, ratepostType, ratefileType, likepostType, likefileType, genInfoType } from "@lib/Types";
 import { useSession } from "next-auth/react";
 import type { Session } from "next-auth";
-import { getFileLikes, getFileRates, getPostLikes, getPostRates, getUsers } from "@/lib/fetchTypes";
+import { getErrorMessage } from "@lib/errorBoundaries";
 const base_url = process.env.NEXT_PUBLIC_baseurl;
 
 
@@ -58,6 +58,8 @@ type generalContextType = {
     setPostRates: React.Dispatch<React.SetStateAction<ratepostType[]>>,
     setGenInfo: React.Dispatch<React.SetStateAction<genInfoType[]>>,
     genInfo: genInfoType[],
+    setGetError: React.Dispatch<React.SetStateAction<string>>,
+    getError: string
 
 }
 export const GeneralContext = React.createContext<generalContextType>({} as generalContextType);
@@ -90,6 +92,7 @@ const GeneralContextProvider = (props: any) => {
     const [postLikes, setPostLikes] = React.useState<likepostType[]>([]);
     const [userPosts, setUserPosts] = React.useState<postType[]>([]);
     const [genInfo, setGenInfo] = React.useState<genInfoType[]>([]);
+    const [getError, setGetError] = React.useState<string>("");
 
     React.useMemo(async () => {
         try {
@@ -98,7 +101,9 @@ const GeneralContextProvider = (props: any) => {
             if (!body) return
             return setPageHitArr(body)
         } catch (error) {
-
+            let message: string = `${getErrorMessage(error)}@api/getpagehits`
+            setGetError(message)
+            return console.error(message)
         }
         ;
     }, []);
@@ -111,7 +116,9 @@ const GeneralContextProvider = (props: any) => {
                 await axios.post(`/api/page-hit`, pageHit);
                 //components
             } catch (error) {
-                console.error(new Error("page hits wasn't recorded"))
+                let message: string = `${getErrorMessage(error)}@api/page-hit`
+                setGetError(message)
+                return console.error(message)
             }
         }
         if (pageHit) {
@@ -129,7 +136,9 @@ const GeneralContextProvider = (props: any) => {
 
                 setGenInfo(body);
             } catch (error) {
-                console.error(new Error("geninfo wasn't pulled@geninfo"))
+                let message: string = `${getErrorMessage(error)}@api/generalInfo`
+                setGetError(message)
+                return console.log(message)
             }
         }
 
@@ -139,7 +148,7 @@ const GeneralContextProvider = (props: any) => {
 
 
     return (
-        <GeneralContext.Provider value={{ account, setAccount, signin, setSignin, isSignin, setIsSignin, session, status, msg, setMsg, users, setUsers, allUsers, setAllUsers, genMsg, setGenMsg, userId, setUserId, signup, setSignup, setPageHit, pageHit, setClose, close, user, setUser, client, setClient, contact, setContact, pageHitArr, setPageHitArr, posts, setPosts, setPost, post, postLikes, setPostLikes, postRates, setPostRates, fileLikes, setFileLikes, fileRates, setFileRates, userPosts, setUserPosts, genInfo, setGenInfo }}>
+        <GeneralContext.Provider value={{ account, setAccount, signin, setSignin, isSignin, setIsSignin, session, status, msg, setMsg, users, setUsers, allUsers, setAllUsers, genMsg, setGenMsg, userId, setUserId, signup, setSignup, setPageHit, pageHit, setClose, close, user, setUser, client, setClient, contact, setContact, pageHitArr, setPageHitArr, posts, setPosts, setPost, post, postLikes, setPostLikes, postRates, setPostRates, fileLikes, setFileLikes, fileRates, setFileRates, userPosts, setUserPosts, genInfo, setGenInfo, getError, setGetError }}>
             {props.children}
         </GeneralContext.Provider>
     )

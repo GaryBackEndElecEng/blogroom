@@ -1,6 +1,8 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import DashboardHeader from "@/components/header/DashboardHeader";
+import GetError from '@/components/comp/GetError';
+
 export const metadata: Metadata = {
     title: {
         default: "Dashboard",
@@ -39,6 +41,7 @@ export default function DashBoardLayout({
     return (
         <div>
             <DashboardHeader />
+            <GetError />
             {children}
         </div>
     )

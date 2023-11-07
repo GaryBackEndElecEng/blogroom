@@ -142,6 +142,16 @@ export function checkvalues(arr: { key: string, value_: string }[], prop: { key:
     });
     return check
 }
+export function check(s3Key: string): boolean {
+    const arr: string[] = ["jpeg", "png", "jpg"];
+    let bool: boolean = false;
+    arr.map((end, index) => {
+        if (s3Key.toLowerCase().endsWith(end) || s3Key.toUpperCase().endsWith(end)) {
+            return bool = true
+        }
+    });
+    return bool
+}
 
 export function insertInput(file: fileType, input: inputType, prop: { key: string, value: string, subject: string }): fileType {
     let tempFile: fileType = file;

@@ -4,42 +4,42 @@ import type { fileType, userType } from "@lib/Types";
 import Image from 'next/image';
 import { GeneralContext } from '@context/GeneralContextProvider';
 import { Heading, Section, Summary, SubHeading, Conclusion } from "@component/blogElements/elements";
-import { getuserFiles } from "@lib/fetchTypes";
-import getFormattedDate from "@lib/getFormattedDate"
+import { getUsernamePage, getuserFiles } from "@lib/fetchTypes";
+import getFormattedDate from "@lib/getFormattedDate";
 import Link from 'next/link';
 import { usePathname } from "next/navigation";
 import { InputContext } from '@/components/context/InputTypeProvider';
-
+import ClientFile from "@component/blog/users/ClientFile";
 
 type usernameType = {
-    getuser: userType | undefined //files and posts are complete
+    username: string
 
 }
-export default function UserNameBlogs({ getuser }: usernameType) {
+export default function UserNameBlogs({ username }: usernameType) {
     const pathname = usePathname();
-    const { client, setClient, setPageHit } = React.useContext(GeneralContext);
+    const { client, setClient, setPageHit, setGetError } = React.useContext(GeneralContext);
     const { setUserFiles, userFiles } = React.useContext(InputContext);
     const [numFiles, setNumFiles] = React.useState<number>(1);
+    console.log("inside", username)
+    React.useMemo(async () => {
+        const getuser = await getUsernamePage(username);
+        if (!getuser) { return setGetError("no user @usernameBlogs") }
+        setClient(getuser as userType)
+    }, [username, setClient, setGetError]);
 
     React.useEffect(() => {
-        if (!getuser) return
-        setClient(getuser);
-        setUserFiles(getuser.files)
-    }, [getuser, setUserFiles, setClient])
+        if (!client) return
+        setUserFiles(client.files)
+    }, [setUserFiles, setClient, client])
 
-    React.useEffect(() => {
-        setNumFiles(userFiles.length)
-    }, [setNumFiles, userFiles]);
+
 
     React.useEffect(() => {
         //pathname=>/blog/usershomelinks/Bob%20Brown
-        if (pathname && getuser && getuser.name) {
-            const params = new URLSearchParams();
-            const username = pathname.split("/")[3];
-            params.set(getuser.name, username);
-            setPageHit({ name: getuser.name, page: pathname })
+        if (pathname && client) {
+            setPageHit({ name: client.name, page: pathname })
         }
-    }, [getuser, setPageHit, pathname]);
+    }, [client, setPageHit, pathname]);
 
 
     const link = "/blog/usershomelinks/"
@@ -48,34 +48,20 @@ export default function UserNameBlogs({ getuser }: usernameType) {
     const title1 = "text-center font-bold text-3xl";
     return (
         <main className="mx-auto lg:container my-2 px-3 mb-3">
-            <h3 className={title}>{getuser && getuser.name}</h3>
+            <h3 className={title}>{client && client.name}</h3>
             <h3 className="text-center font-bold text-xl">Welcome</h3>
             <section className=" mx-auto my-2 mb-6 w-full sm:w-7/8 lg:w-3/4 mx-auto px-3">
-                <p className="my-1 sm:px-3 text-xl sm:leading-10">{getuser && getuser.bio}</p>
+                <p className="my-1 sm:px-3 text-xl sm:leading-10">{client && client.bio}</p>
             </section>
 
             <h3 className="text-center text-[white]  underline underline-offset-8 text-2xl my-3 mb-[3vh]">blogs</h3>
 
-            <section className={numFiles && numFiles === 1 ? `grid grid-cols-1 mx-auto my-2 gap-4 mx-auto px-3` : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mx-auto my-2 gap-4 mx-auto sm:px-3 mb-4"}>
+            <section className={`grid grid-cols-1 mx-auto my-2 gap-4 mx-auto px-3`}>
                 {userFiles && userFiles.map((file, index) => {
                     if (file.published) return (
-                        <main key={index} className="col-span-1 card  ">
-                            {file.imageUrl && <Image src={file.imageUrl} width={600} height={400} className="aspect-video" alt={`${file.name}-${client && client.name}`} />}
-                            <Link href={`${link}/${client && client.name && client.name.replace(" ", "-")}/${file.id}`} className={flexcol} >
-                                <div className={" m-auto"}>
-                                    <h3 className={title1}>{file.title}</h3>
-                                    <div className={flexcol}>
-                                        <p className="sm:mx-auto text-xl sm:leading-10">{file.content}</p>
-                                    </div>
-                                    <div className="flex-flex-row flex-wrap justify-content">
-                                        <small className="my-2 mx-auto">{client && client.name}</small>
-                                        <small className="my-2 mx-auto">{(file && file.date) && getFormattedDate(file?.date)}</small>
-
-                                    </div>
-                                </div>
-                            </Link>
-
-                        </main>
+                        <React.Fragment key={index}>
+                            <ClientFile file={file} client={client} />
+                        </React.Fragment>
                     )
                 })}
             </section>

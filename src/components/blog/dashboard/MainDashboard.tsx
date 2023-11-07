@@ -13,13 +13,16 @@ type mainContextType = {
 // USER'S DASHBOARD DISPLAYS ALL OF DASHBOARD!!!!!!!!
 export default function MainDashboard({ account, getuser }: mainContextType) {
     const { setUserFiles } = React.useContext(InputContext);
-    const { setUserPosts } = React.useContext(GeneralContext);
+    const { setUserPosts, setGetError } = React.useContext(GeneralContext);
 
     React.useEffect(() => {
-        if (!getuser) return
+        if (!getuser) {
+            setGetError("did not get user info @blogs=>dashboard=> MainDashboard")
+            return
+        }
         setUserFiles(getuser.files);
         setUserPosts(getuser.posts);
-    }, [setUserFiles, getuser, setUserPosts])
+    }, [setUserFiles, getuser, setUserPosts, setGetError])
 
     if (account && account.data && getuser) {
 

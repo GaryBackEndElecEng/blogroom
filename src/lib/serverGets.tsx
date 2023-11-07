@@ -9,6 +9,7 @@ import { getEmailUser, getUser } from "./fetchTypes";
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import "@aws-sdk/signature-v4-crt";
+import { check } from "@lib/generalFunc"
 
 const Bucket = process.env.BUCKET_NAME as string
 const region = process.env.BUCKET_REGION as string
@@ -304,7 +305,7 @@ export async function getUsers(): Promise<userType[] | undefined> {
         });
         if (users) {
             let tempUsers = users as userType[];
-            await Promise.all(
+            const allUser = await Promise.all(
                 tempUsers.map(async (user) => {
                     if (user.imgKey && check(user.imgKey)) {
                         const params = { Key: user.imgKey, Bucket };
@@ -314,7 +315,7 @@ export async function getUsers(): Promise<userType[] | undefined> {
                     return user
                 })
             );
-            return tempUsers
+            return allUser
         }
     } catch (error) {
 
@@ -322,16 +323,7 @@ export async function getUsers(): Promise<userType[] | undefined> {
         await prisma.$disconnect()
     }
 }
-export function check(s3Key: string): boolean {
-    const arr: string[] = ["jpeg", "png", "jpg"];
-    let bool: boolean = false;
-    arr.map((end, index) => {
-        if (s3Key.toLowerCase().endsWith(end) || s3Key.toUpperCase().endsWith(end)) {
-            return bool = true
-        }
-    });
-    return bool
-}
+
 
 export async function getUserUserName(username: string): Promise<userType | undefined> {
     if (!username) return
