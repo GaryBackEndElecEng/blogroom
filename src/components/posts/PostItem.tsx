@@ -1,21 +1,35 @@
 "use client";
 import Image from 'next/image'
 import React from 'react';
-import type { postType, userType } from "@lib/Types";
+import type { postType, userType, userTypeShort } from "@lib/Types";
 import styles from "./posts.module.css";
 import Link from 'next/link';
 import { useRouter } from "next/navigation"
 import PostLike from "@/components/posts/PostLike";
 import PostRate from "@component/posts/PostRate";
+import { getUser } from '@/lib/fetchTypes';
+import { GeneralContext } from '../context/GeneralContextProvider';
 
 type mainType = {
     post: postType,
     date: string | undefined,
-    user: userType | undefined
 }
 
-export default function PostItem({ post, date, user }: mainType) {
+export default function PostItem({ post, date }: mainType) {
     const router = useRouter();
+    const { setGetError } = React.useContext(GeneralContext);
+    const [user, setUser] = React.useState<userTypeShort | undefined>()
+
+    React.useMemo(async () => {
+        if (post) {
+            const getuser = await getUser(post.userId)
+            if (getuser) {
+                setUser(getuser);
+            } else {
+                setGetError(" getting user failed")
+            }
+        }
+    }, [post, setUser, setGetError]);
 
     const handleLink = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.preventDefault();

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@_prisma/client";
-import { userType } from "@/lib/Types";
+import { userType, userTypeShort } from "@/lib/Types";
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import "@aws-sdk/signature-v4-crt";
@@ -24,20 +24,15 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     const username: string = req.query.username as string;
     const user_name = username.replace("-", " ")
     try {
-        const user = await prisma.user.findMany({
+        const user = await prisma.user.findFirst({
             where: {
                 name: user_name
             },
 
-            skip: 0,
-            take: 1,
-            // include: {
-            //     files: true
-            // }
         });
-        if (user[0]) {
+        if (user) {
             // console.log(user[0])//works
-            const userWithImage = insertImgUser(user[0] as userType)
+            const userWithImage = insertImgUser(user as unknown as userTypeShort)
             res.status(200).json(userWithImage)
             await prisma.$disconnect()
         } else {
@@ -51,7 +46,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     }
 }
 
-export async function insertImgUser(user: userType) {
+export async function insertImgUser(user: userTypeShort) {
 
     if (!user.imgKey) return user
     const params = {

@@ -20,6 +20,7 @@ export const s3 = new S3Client({
 });
 
 export default async function handle(req: NextApiRequest, res: NextApiResponse) {
+
     try {
         const users = await prisma.user.findMany({
 

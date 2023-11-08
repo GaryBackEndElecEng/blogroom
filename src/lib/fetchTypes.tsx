@@ -107,7 +107,7 @@ export async function getUsers() {
 export async function getUser(userId: string) {
     try {
         const { data } = await axios.get(`/api/getuser?userId=${userId}`);
-        const user: userType = await data as userType
+        const user: userTypeShort = await data as userTypeShort
         return user
     } catch (error) {
         console.error(new Error("server issues"))

@@ -1,7 +1,7 @@
 "use client"
 import React from 'react';
 import { Heading, Section, Summary, SubHeading, Conclusion, type_, ImageJsx, FileContent, Question, HLink, ListComp } from "@blogElement/elements";
-import type { fetchSingleFileType, fileType, msgType, userType } from "@lib/Types";
+import type { fetchSingleFileType, fileType, msgType, userType, userTypeShort } from "@lib/Types";
 import { inputArr } from "@lib/Types";
 import Button from '../../comp/Button';
 import Link from 'next/link';
@@ -32,7 +32,7 @@ export default function UserBlogItem({ file }: mainBlogItemType) {
 
     React.useMemo(async () => {
         if (!(file && file.userId)) return;
-        const getuser = await getUser(file.userId)
+        const getuser = await getUser(file.userId) as userTypeShort as userType
         if (!getuser) return
         setUser(getuser)
     }, [file, setUser]);

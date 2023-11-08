@@ -1,5 +1,5 @@
 "use client";
-import { postType, arrLikeType } from '@/lib/Types';
+import { postType, arrLikeType, userTypeShort, userType } from '@/lib/Types';
 import React from 'react';
 import Image from 'next/image';
 import getFormattedDate from "@lib/getFormattedDate"
@@ -24,7 +24,7 @@ export default function DetailPost({ post }: mainDetailType) {
 
     React.useMemo(async () => {
         if (!post) return
-        const getuser = await getUser(post.userId);
+        const getuser = await getUser(post.userId) as userTypeShort as userType;
         if (!getuser) return
         setUser(getuser)
     }, [setUser, post]);
